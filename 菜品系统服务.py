@@ -314,6 +314,11 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def main():
+    import argparse
+    ap = argparse.ArgumentParser(description="菜品系统本地服务")
+    ap.add_argument("--no-browser", action="store_true", help="启动后不自动打开浏览器（由 bat 统一打开页面）")
+    args = ap.parse_args()
+
     if openpyxl is None:
         print("[错误] 未检测到 openpyxl，请先执行: pip install openpyxl")
         input("按回车键退出...")
@@ -329,7 +334,8 @@ def main():
     print("    POST /api/sync_records  选菜记录写入 Excel")
     print("  停止服务: 关闭本窗口或按 Ctrl+C")
     print("=" * 56)
-    webbrowser.open(url)
+    if not args.no_browser:
+        webbrowser.open(url)
     try:
         server.serve_forever()
     except KeyboardInterrupt:
