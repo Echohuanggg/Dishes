@@ -1,3 +1,14 @@
+---
+AIGC:
+    Label: "1"
+    ContentProducer: 001191440300708461136T1XGW3
+    ProduceID: ea5569d88ea2058e834b89ecbac77842_6e47d38da50911f180e2525400d4ab64
+    ReservedCode1: EsidVJEjlWzoPNqLs4KVOQGLSpjt5t8O2glVivfIKb8e8A/C6Jcyn5gCmlHm+/pkrC0jH5GfTM+iHw/zGYeAz4NXaIraOS9pvze2JPf2iHbvC3NbQ58uFl+sHNb/kVKt1whlp1od+oX3Fc9aJqpd07OS6nCmdKSVIFPvkckL/QWcefP1rRiNmLbe/So=
+    ContentPropagator: 001191440300708461136T1XGW3
+    PropagateID: ea5569d88ea2058e834b89ecbac77842_6e47d38da50911f180e2525400d4ab64
+    ReservedCode2: EsidVJEjlWzoPNqLs4KVOQGLSpjt5t8O2glVivfIKb8e8A/C6Jcyn5gCmlHm+/pkrC0jH5GfTM+iHw/zGYeAz4NXaIraOS9pvze2JPf2iHbvC3NbQ58uFl+sHNb/kVKt1whlp1od+oX3Fc9aJqpd07OS6nCmdKSVIFPvkckL/QWcefP1rRiNmLbe/So=
+---
+
 # 慧的菜品选择系统
 
 个人家常菜谱管理小工具：25 道菜谱浏览、餐次筛选、按食材搜索、随机选菜、菜谱查看、新增菜品。
@@ -56,3 +67,4 @@
 3. 等 1~2 分钟，访问 `https://<用户名>.github.io/<仓库名>/菜品选择.html`
 
 > 注意：仓库转 private 会自动停用 Pages；转回 public 后需到 Settings → Pages 重新选择分支保存一次。
+*（内容由AI生成，仅供参考）*
