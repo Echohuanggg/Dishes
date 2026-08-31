@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="Hui">
+<title>慧的菜品选择系统</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: "Microsoft YaHei", "PingFang SC", sans-serif; background: #f7f5f0; color: #333; }
+.header { background: linear-gradient(135deg, #ff9a56, #ff6b6b); color: #fff; padding: 28px 20px; text-align: center; }
+.header h1 { font-size: 28px; margin-bottom: 6px; }
+.header p { font-size: 14px; opacity: 0.9; }
+.conn-badge { display: inline-block; margin-top: 10px; padding: 4px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; background: #fff; }
+.conn-badge.on { color: #2e7d32; }
+.conn-badge.off { color: #9e9e9e; }
+.filter-bar { display: flex; justify-content: center; gap: 12px; padding: 18px 12px; flex-wrap: wrap; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.06); position: sticky; top: 0; z-index: 10; }
+.filter-btn { padding: 8px 22px; border-radius: 20px; border: 1px solid #e0dcd3; background: #fff; color: #555; font-size: 14px; cursor: pointer; transition: all .2s; }
+.filter-btn:hover { border-color: #ff6b6b; color: #ff6b6b; }
+.filter-btn.active { background: #ff6b6b; color: #fff; border-color: #ff6b6b; }
+.filter-search { display: flex; align-items: center; gap: 8px; padding: 0 14px; border: 1px solid #e0dcd3; border-radius: 20px; background: #fff; }
+.filter-search input { border: none; outline: none; padding: 8px 0; font-size: 14px; color: #555; width: 150px; background: transparent; }
+.filter-search input::placeholder { color: #bbb; }
+.filter-search .search-icon { color: #bbb; font-size: 14px; }
+.filter-search:focus-within { border-color: #ff6b6b; }
+.filter-search .clear-btn { border: none; background: none; color: #bbb; cursor: pointer; font-size: 14px; padding: 4px; line-height: 1; }
+.filter-search .clear-btn:hover { color: #ff6b6b; }
+.shop-btn { padding: 8px 22px; border-radius: 20px; border: 1px dashed #ccc; background: #f0f0f0; color: #aaa; font-size: 14px; cursor: not-allowed; }
+.random-bar { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 14px 12px; background: #fff8f2; border-bottom: 1px solid #f0e6da; }
+.random-controls { display: flex; justify-content: center; align-items: center; gap: 12px; flex-wrap: wrap; }
+.random-result { display: flex; align-items: center; justify-content: center; gap: 20px; background: #fff; border: 1px solid #f0e6da; border-radius: 14px; padding: 16px 20px; width: 100%; max-width: 760px; flex-wrap: wrap; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+.rr-info { flex: 1; min-width: 260px; }
+.rr-name { font-size: 18px; font-weight: 600; margin-bottom: 6px; color: #333; }
+.rr-shop { font-size: 13px; color: #777; margin-top: 8px; line-height: 1.7; }
+.rr-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.random-label { font-size: 14px; color: #e8890c; font-weight: 600; }
+.random-select { padding: 8px 14px; border-radius: 10px; border: 1px solid #e0dcd3; font-size: 14px; background: #fff; color: #555; cursor: pointer; outline: none; }
+.random-select:focus { border-color: #ff6b6b; }
+.btn-random { padding: 8px 22px; border-radius: 20px; border: none; background: linear-gradient(135deg, #ff9a56, #ff6b6b); color: #fff; font-size: 14px; cursor: pointer; transition: opacity .2s; }
+.btn-random:hover { opacity: 0.85; }
+.btn-stat { padding: 8px 18px; border-radius: 20px; border: 1px solid #e0dcd3; background: #fff; color: #555; font-size: 14px; cursor: pointer; transition: all .2s; }
+.btn-stat:hover { border-color: #ff6b6b; color: #ff6b6b; }
+.btn-rec { padding: 8px 14px; border-radius: 10px; border: 1px solid #ffb28a; background: #fff8f2; color: #e8890c; font-size: 13px; cursor: pointer; transition: all .2s; }
+.btn-rec:hover { background: #ff6b6b; color: #fff; border-color: #ff6b6b; }
+.stat-totals { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+.stat-total { background: #fff3e6; color: #e8890c; border-radius: 12px; padding: 6px 14px; font-size: 13px; }
+.stat-total b { font-size: 16px; }
+.stat-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.stat-table th, .stat-table td { border: 1px solid #eee; padding: 8px 10px; text-align: center; }
+.stat-table th { background: #faf6ef; color: #888; font-weight: 600; }
+.stat-detail { list-style: none; padding: 0; margin: 0; max-height: 180px; overflow-y: auto; font-size: 13px; color: #555; line-height: 1.8; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; padding: 24px; max-width: 1200px; margin: 0 auto; }
+.card { background: #fff; border-radius: 14px; padding: 20px 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.07); cursor: pointer; transition: transform .15s, box-shadow .15s; border: 1px solid #eee; }
+.card:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,0.12); }
+.card .name { font-size: 17px; font-weight: 600; margin-bottom: 10px; }
+.tags { display: flex; gap: 8px; flex-wrap: wrap; }
+.tag { font-size: 12px; padding: 3px 10px; border-radius: 12px; background: #f3f0ea; color: #777; }
+.tag.meal { background: #fff3e6; color: #e8890c; }
+.tag.cat { background: #e8f4ff; color: #2b7bd8; }
+.modal-mask { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 100; justify-content: center; align-items: center; padding: 20px; }
+.modal-mask.show { display: flex; }
+.modal { background: #fff; border-radius: 16px; max-width: 640px; width: 100%; max-height: 82vh; overflow-y: auto; padding: 26px 28px; position: relative; }
+.modal h2 { font-size: 22px; margin-bottom: 12px; }
+.modal .meta { font-size: 13px; color: #888; margin-bottom: 14px; display: flex; gap: 10px; flex-wrap: wrap; }
+.modal .section { margin-bottom: 14px; }
+.modal .section h3 { font-size: 15px; color: #ff6b6b; margin-bottom: 6px; }
+.modal .steps { white-space: pre-wrap; line-height: 1.9; font-size: 14px; color: #444; background: #faf8f4; border-radius: 10px; padding: 14px 16px; }
+.modal .btn-row { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+.btn-douyin { display: inline-block; padding: 10px 20px; background: #000; color: #fff; border-radius: 10px; text-decoration: none; font-size: 14px; }
+.btn-close { padding: 10px 20px; background: #f0ece4; color: #666; border: none; border-radius: 10px; font-size: 14px; cursor: pointer; }
+.tag.new { background: #ff6b6b; color: #fff; }
+.btn-add { padding: 8px 22px; border-radius: 20px; border: 1px dashed #4caf50; background: #f2fbf2; color: #2e7d32; font-size: 14px; cursor: pointer; transition: all .2s; }
+.btn-add:hover { background: #4caf50; color: #fff; border-color: #4caf50; }
+.form-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; }
+.form-row label { width: 84px; flex-shrink: 0; font-size: 13px; color: #666; line-height: 32px; }
+.form-row label .req { color: #ff6b6b; }
+.form-row input[type="text"], .form-row textarea, .form-row select { flex: 1; padding: 7px 10px; border: 1px solid #e0dcd3; border-radius: 8px; font-size: 13px; outline: none; font-family: inherit; }
+.form-row input[type="text"]:focus, .form-row textarea:focus, .form-row select:focus { border-color: #ff6b6b; }
+.form-row textarea { resize: vertical; min-height: 72px; line-height: 1.6; }
+.form-row .meal-custom { flex: 1; }
+.footer { text-align: center; padding: 20px; color: #aaa; font-size: 12px; }
+@media (max-width: 768px) {
+  .header { padding: 18px 12px; }
+  .header h1 { font-size: 22px; }
+  .header p { font-size: 12px; }
+  .filter-bar { gap: 8px; padding: 12px 8px; }
+  .filter-btn { padding: 6px 13px; font-size: 13px; }
+  .filter-search { flex: 1 1 auto; min-width: 130px; }
+  .filter-search input { width: 100%; font-size: 13px; }
+  .btn-add, .shop-btn { padding: 6px 14px; font-size: 13px; }
+  .random-bar { padding: 12px 8px; gap: 10px; }
+  .random-result { padding: 12px 10px; gap: 10px; }
+  .rr-info { min-width: 100%; }
+  .rr-actions { width: 100%; justify-content: center; }
+  .grid { padding: 14px 10px; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+  .card { padding: 14px 12px; }
+  .card .name { font-size: 15px; }
+  .modal { padding: 18px 16px; max-height: 88vh; }
+  .modal h2 { font-size: 19px; }
+  .modal .steps { font-size: 13px; padding: 12px; }
+  .form-row { flex-direction: column; gap: 4px; }
+  .form-row label { width: auto; line-height: 1.6; }
+  .stat-table th, .stat-table td { padding: 6px; font-size: 12px; }
+}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>慧的菜品选择系统</h1>
+  <p>共 <span id="totalCount">0</span> 道菜 · 点击卡片查看菜谱</p>
+  <span class="conn-badge off" id="connBadge">未连接（可手动同步）</span>
+</div>
+<div class="filter-bar">
+  <button class="filter-btn active" data-meal="全部">全部</button>
+  <button class="filter-btn" data-meal="早餐">早餐</button>
+  <button class="filter-btn" data-meal="正餐">正餐</button>
+  <button class="filter-btn" data-meal="甜品">甜品</button>
+  <div class="filter-search">
+    <span class="search-icon">🔍</span>
+    <input id="ingrFilter" type="text" placeholder="按食材筛选" autocomplete="off" />
+    <button class="clear-btn" id="ingrClear" title="清空">×</button>
+  </div>
+  <button class="btn-add" onclick="openAdd()">＋ 新增菜品</button>
+  <button class="shop-btn" disabled title="即将上线，敬请期待">🛒 购物清单（即将上线）</button>
+</div>
+<div class="random-bar">
+  <div class="random-controls">
+    <span class="random-label">随机选菜</span>
+    <select id="rMealSelect" class="random-select"></select>
+    <button id="rPickBtn" class="btn-random">随机来一道</button>
+    <button id="rStatBtn" class="btn-stat">选菜记录</button>
+  </div>
+  <div class="random-result" id="randomResult" style="display:none;">
+    <div class="rr-info">
+      <div class="rr-name" id="rrName"></div>
+      <div class="tags"><span class="tag meal" id="rrMeal"></span><span class="tag cat" id="rrCat"></span></div>
+      <div class="rr-shop" id="rrShop"></div>
+    </div>
+    <div class="rr-actions">
+      <button class="btn-random" id="rrAgainBtn">换一道</button>
+      <button class="btn-rec" id="rrConfirmBtn">就它了，记录</button>
+      <button class="btn-close" id="rrDetailBtn">查看菜谱</button>
+    </div>
+  </div>
+</div>
+<div class="grid" id="grid"></div>
+<div class="footer">数据来源：Hui's Menu.pdf · 第一版 · 2026-08</div>
+
+<div class="modal-mask" id="modalMask">
+  <div class="modal" id="modal">
+    <h2 id="mName"></h2>
+    <div class="meta" id="mMeta"></div>
+    <div class="section" id="mIngr" style="display:none;">
+      <h3>食材</h3>
+      <div class="steps" id="mIngrText"></div>
+    </div>
+    <div class="section" id="mShop" style="display:none;">
+      <h3>购物清单</h3>
+      <div class="steps" id="mShopText"></div>
+    </div>
+    <div class="section">
+      <h3>做法步骤</h3>
+      <div class="steps" id="mSteps"></div>
+    </div>
+    <div class="btn-row">
+      <a class="btn-douyin" id="mDouyin" href="#" target="_blank" style="display:none;">查看抖音视频</a>
+      <button class="btn-close" onclick="closeModal()">关闭</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-mask" id="rModalMask">
+  <div class="modal" style="max-width:420px;">
+    <h2>记录选定</h2>
+    <div class="meta" id="rRecordName"></div>
+    <div class="btn-row" style="justify-content:center;">
+      <button class="btn-rec" onclick="recordSelection('早餐')">早餐选定</button>
+      <button class="btn-rec" onclick="recordSelection('中餐')">中餐选定</button>
+      <button class="btn-rec" onclick="recordSelection('晚餐')">晚餐选定</button>
+    </div>
+    <div class="btn-row" style="justify-content:center;">
+      <button class="btn-close" onclick="closeRandom()">取消</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-mask" id="rStatMask">
+  <div class="modal">
+    <h2>选菜记录统计</h2>
+    <div class="stat-totals">
+      <span class="stat-total">早餐 <b id="stTotalBreakfast">0</b></span>
+      <span class="stat-total">中餐 <b id="stTotalLunch">0</b></span>
+      <span class="stat-total">晚餐 <b id="stTotalDinner">0</b></span>
+      <span class="stat-total">累计 <b id="stTotalAll">0</b> 次</span>
+    </div>
+    <div class="section">
+      <h3>按日期统计</h3>
+      <table class="stat-table">
+        <thead><tr><th>日期</th><th>早餐</th><th>中餐</th><th>晚餐</th><th>合计</th></tr></thead>
+        <tbody id="stTableBody"></tbody>
+      </table>
+    </div>
+    <div class="section">
+      <h3>历史明细（按日期倒序）</h3>
+      <ul class="stat-detail" id="stDetailList"></ul>
+    </div>
+    <p style="color:#888;font-size:12px;margin:8px 0 4px;">下载后放到 慧做菜 文件夹或下载目录，双击「菜品系统.bat」即可自动写入 Excel；也可以直接把 json 文件拖给 Marvis</p>
+    <div class="btn-row">
+      <button class="btn-close" id="stSyncBtn" style="background:#e8890c;color:#fff;">导出记录文件</button>
+      <button class="btn-close" id="stExportBtn" style="background:#ff6b6b;color:#fff;">导出CSV</button>
+      <button class="btn-close" id="stNewDishBtn" style="background:#4caf50;color:#fff;" title="下载后放到 慧做菜 文件夹或下载目录，双击「菜品系统.bat」自动写入 Excel">导出新菜品</button>
+      <button class="btn-close" onclick="closeStats()">关闭</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-mask" id="addMask">
+  <div class="modal" style="max-width:560px;">
+    <h2>新增菜品</h2>
+    <div class="form-row">
+      <label><span class="req">*</span>菜品名称</label>
+      <input type="text" id="adName" placeholder="必填，如：番茄炒蛋">
+    </div>
+    <div class="form-row">
+      <label><span class="req">*</span>餐次</label>
+      <select id="adMeal" onchange="onAddMealChange()">
+        <option value="早餐">早餐</option>
+        <option value="正餐">正餐</option>
+        <option value="甜品">甜品</option>
+        <option value="自定义">自定义</option>
+      </select>
+      <input type="text" id="adMealCustom" class="meal-custom" placeholder="输入新餐次，如：夜宵" style="display:none;">
+    </div>
+    <div class="form-row">
+      <label>分类</label>
+      <input type="text" id="adCat" placeholder="如：素菜 / 荤菜 / 主食">
+    </div>
+    <div class="form-row">
+      <label>食材（原料）</label>
+      <input type="text" id="adIngr" placeholder="如：番茄，鸡蛋">
+    </div>
+    <div class="form-row">
+      <label>菜谱步骤</label>
+      <textarea id="adSteps" placeholder="1. …&#10;2. …"></textarea>
+    </div>
+    <div class="form-row">
+      <label>抖音链接</label>
+      <input type="text" id="adDouyin" placeholder="选填">
+    </div>
+    <div class="form-row">
+      <label>食材清单</label>
+      <input type="text" id="adShop" placeholder="选填，如：番茄2个、鸡蛋3个">
+    </div>
+    <p style="color:#888;font-size:12px;margin:6px 0 0;">保存后请点「导出新菜品」，下载 新菜品_YYYYMMDD.json 放到慧做菜文件夹或下载目录，双击「菜品系统.bat」自动写入 Excel。</p>
+    <div class="btn-row">
+      <button class="btn-close" id="adSaveBtn" style="background:#ff6b6b;color:#fff;">保存</button>
+      <button class="btn-close" onclick="closeAdd()">取消</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const DISHES = [{"编号": "1", "菜品名称": "家常豆腐", "餐次": "正餐", "分类": "素菜", "菜谱步骤": "1.老豆腐切三角块 2.准备葱姜蒜末，小米辣，豆瓣酱，耗油，老抽一点点，生抽，盐，鸡精，糖，加水拌匀 3.准备水淀粉 4.热锅热油，油炸老豆腐三角块，至两面金黄 5.倒入调好得酱汁，小火煮三分钟入味 6.淋入水淀粉勾芡，翻炒即可出锅", "抖音链接": "", "食材清单": "老豆腐1块、葱姜蒜适量、小米辣2个、豆瓣酱1勺、蚝油1勺、老抽少许、生抽1勺、盐适量、鸡精少许、糖少许、淀粉1勺", "食材（原料）": "老豆腐"},
+{"编号": "2", "菜品名称": "酸奶巧克力雪糕", "餐次": "甜品", "分类": "甜品", "菜谱步骤": "1.隔水融化巧克力 2.用手捏碎巧克力 3.撕开外包装，倒入液体酸奶 4.搅拌均匀，插入冰棒棍子 5.垂直放入杯子，放入冷冻冰箱", "抖音链接": "", "食材清单": "德芙巧克力1条、酸奶1盒、冰棒棍若干", "食材（原料）": "德芙巧克力"},
+{"编号": "3", "菜品名称": "抱蛋煎饺", "餐次": "早餐", "分类": "主食", "菜谱步骤": "1.倒入速冻饺子，淋上适量食用油，倒水 2.加锅盖，小火收干水份 3.倒入加盐得蛋液，小火煎至定型 4.撒上芝麻，撒上葱花", "抖音链接": "", "食材清单": "速冻水饺1袋（约15个）、鸡蛋2个、食用油适量、盐少许、芝麻少许、葱花少许", "食材（原料）": "速冻水饺"},
+{"编号": "4", "菜品名称": "自制白糖盐味大饼", "餐次": "早餐", "分类": "主食", "菜谱步骤": "", "抖音链接": "", "食材清单": "面粉500克、白糖适量、盐适量、清水适量", "食材（原料）": "面粉"},
+{"编号": "5", "菜品名称": "蒜末耗油蒸茄子", "餐次": "正餐", "分类": "素菜", "菜谱步骤": "1.洗净线茄，中火上锅蒸10分钟 2.去除凉一会，用手撕成条 3.准备蒜末，葱末 4.碗内倒入耗油，生抽，纯净水调汁 5.起锅烧油，加入蒜末炒出香味，倒入调好的酱汁，料汁烧开后关火 6.酱汁淋上即可", "抖音链接": "", "食材清单": "线茄2根、蒜末适量、葱末适量、蚝油1勺、生抽1勺、纯净水适量", "食材（原料）": "线茄"},
+{"编号": "6", "菜品名称": "酸辣包菜丝", "餐次": "正餐", "分类": "素菜", "菜谱步骤": "1.包菜切丝，放入盆里，加入盐，糖 2.10分钟后，腌出水分后，挤干白菜丝得水分 3.起锅烧油，放蒜片和干辣椒爆香 4.倒入白菜丝，放少许盐和一勺生抽调味 5.大火爆炒，出锅前放入一勺香醋，快速炒匀即可出锅", "抖音链接": "", "食材清单": "包菜半个、盐适量、糖适量、蒜片适量、干辣椒3个、生抽1勺、香醋1勺", "食材（原料）": "包菜"},
+{"编号": "7", "菜品名称": "蔬菜豆腐羹", "餐次": "正餐", "分类": "汤", "菜谱步骤": "1.准备豆腐丁，蕃茄丁，鸡蛋液，水淀粉 2.锅内放入少许油，放入番茄丁，煸炒出汤汁 3.倒入适量清水，开锅后淋入鸡蛋液 4.倒入豆腐，金针菇，青菜 5.再次煮开以后加入盐，鸡精，胡椒粉调味 6.最后淋入少许水淀粉勾芡出锅", "抖音链接": "", "食材清单": "嫩豆腐1块、番茄1个、青菜1把、金针菇1小把、鸡蛋1个、盐适量、鸡精少许、胡椒粉少许、水淀粉适量", "食材（原料）": "青菜，嫩豆腐，番茄"},
+{"编号": "8", "菜品名称": "皮蛋瘦肉粥", "餐次": "早餐", "分类": "主食", "菜谱步骤": "1.里脊肉切粒，加姜丝，盐，胡椒粉，料酒，淀粉，抓拌均匀腌制10分钟 2.洗净大米加两个松花蛋，捏碎后倒入适量清水，盖上盖子煮开后用勺子轻推，防止粘底 3.虚盖再煮半小时，再放入肉丁和香菇丁 4.再煮5分钟，调味加盐，鸡精，胡椒粉，最后撒上葱花即可", "抖音链接": "", "食材清单": "大米1杯、皮蛋2个、瘦肉100克、姜丝适量、香菇2朵、盐适量、鸡精少许、胡椒粉少许、葱花少许", "食材（原料）": "皮蛋，瘦肉"},
+{"编号": "9", "菜品名称": "肉末蒸蛋", "餐次": "正餐", "分类": "荤菜", "菜谱步骤": "1.取四枚鸡蛋，打匀鸡蛋，加温水30度（蛋液得1.5倍） 2.加水打匀，将泡沫取出，蒙上一层保鲜膜。放入蒸锅，蒸10分钟 3.倒入适量的油，煸炒肉末，加入蒜末，姜末，小葱花 4.炒香以后，放入生抽，少许老抽，加一点水，一点白糖，点一点香油 5.出锅再放一点葱花，最后浇在鸡蛋液上。", "抖音链接": "", "食材清单": "鸡蛋4个、肉末100克、温水适量、蒜末/姜末/葱花适量、生抽1勺、老抽少许、白糖少许、香油少许", "食材（原料）": "瘦肉"},
+{"编号": "10", "菜品名称": "牛肉酱", "餐次": "正餐", "分类": "酱料", "菜谱步骤": "1.准备材料：1斤牛肉粒，1斤姜末，1斤蒜末，1斤豆豉半斤花生粒，半斤芝麻，2~3斤的油 2.2-3斤的生牛肉，用卤水卤制到1-2斤左右，取适量切成牛肉粒放一边备用 3.花生碎和白芝麻炒熟备用 4.锅中倒入2-3斤食用油，大火加热后放入牛肉粒煎炸至白雾消失 5.放入姜末蒜末各一斤，仅需大火翻炒至白雾消失 6.放入1斤豆豉，继续中火翻炒，5分钟以后加入花生粒，冰糖，卤水，花椒，盐，味精调味 7.小火不断搅拌20分钟左右，放入白芝麻即可，等待锅中牛肉酱冷却以后分装到玻璃瓶中 8.放入冰箱中储存待用", "抖音链接": "", "食材清单": "生牛肉2-3斤、姜末1斤、蒜末1斤、豆豉1斤、花生粒半斤、白芝麻半斤、食用油2-3斤、冰糖适量、花椒适量、盐适量、味精少许、卤水适量", "食材（原料）": "牛肉，姜末，蒜末，豆豉，花生粒，芝麻，食用油"},
+{"编号": "11", "菜品名称": "糖醋里脊", "餐次": "正餐", "分类": "荤菜", "菜谱步骤": "1.肉切长条，料酒，胡椒粉，盐，鸡蛋搅拌均匀 2.每根肉条裹上一层淀粉 3.五层油温下入锅炸至金黄，捞出 4.起锅热油，加入番茄酱，白醋，糖，雪碧，水淀粉搅匀 5.下油炸好的里脊条，搅匀出锅即可", "抖音链接": "", "食材清单": "里脊肉500克、鸡蛋1个、淀粉适量、番茄酱3勺、白醋1勺、白糖2勺、雪碧适量、料酒适量、胡椒粉少许、盐少许", "食材（原料）": "里脊肉，雪碧"},
+{"编号": "12", "菜品名称": "黄金早餐饼", "餐次": "早餐", "分类": "主食", "菜谱步骤": "1.3个鸡蛋搅散，倒入剩米饭，火腿肠粒", "抖音链接": "", "食材清单": "鸡蛋3个、剩米饭1碗、火腿肠1根", "食材（原料）": "鸡蛋，剩米饭，火腿肠"},
+{"编号": "13", "菜品名称": "葱香油拌面", "餐次": "早餐", "分类": "主食", "菜谱步骤": "1.大蒜切片 2.锅里放油加热炸一下蒜片 3.蒜片微微变焦黄以后，加入芝麻油降温，然后离火过滤出蒜片 4.蒜香油里面倒入生抽和老抽，挤入耗油，加入老干妈，搅拌均匀 5.煮泡面，煎一个荷包蛋，准备葱花 6.捞出泡面，抖干多余的水汽，让它变干爽 7.加入2到3勺调好的蒜香油 8.倒入炸过的蒜片，翻拌均匀，放入荷包蛋，葱花即可", "抖音链接": "", "食材清单": "泡面1包、大蒜1头、芝麻油适量、生抽1勺、老抽1勺、蚝油1勺、老干妈1勺、鸡蛋1个、葱花适量", "食材（原料）": "泡面"},
+{"编号": "14", "菜品名称": "糖醋土豆鸡蛋", "餐次": "正餐", "分类": "素菜", "菜谱步骤": "1.土豆切块 2.打几个鸡蛋上锅煎蛋，散蛋炒熟即可 3.剩下的油，煎土豆至两面金黄即可出锅 4.调一个糖醋汁 5.起锅热油，先下葱，蒜，小米辣，煸香以后放入土豆块和鸡蛋 6.炒匀以后倒入糖醋汁，撒上葱花即可", "抖音链接": "", "食材清单": "土豆2个、鸡蛋3个、葱蒜小米辣适量、番茄酱3勺、醋2勺、生抽1勺、白糖2勺、淀粉1勺", "食材（原料）": "土豆，鸡蛋"},
+{"编号": "15", "菜品名称": "油蒜虾", "餐次": "正餐", "分类": "荤菜", "菜谱步骤": "1.开背取虾线 2.添加海盐，黑胡椒粉，红椒粉和色拉油腌制 3.蒜切皮，欧芹或者香菜切沫沫 4.下蒜片爆香，倒入虾仁，两面刚好煎熟即可 5.千万千万不要煎过头，关火用柠檬汁降温，撒上香菜末即可", "抖音链接": "", "食材清单": "鲜虾300克、海盐适量、黑胡椒粉适量、红椒粉适量、色拉油适量、蒜1头、欧芹/香菜适量、柠檬半个", "食材（原料）": "虾"},
+{"编号": "16", "菜品名称": "酱黄瓜", "餐次": "早餐", "分类": "素菜", "菜谱步骤": "准备：盐糖腌制黄瓜。1.1小时后，沥干水分，倒入蒜瓣，小米辣，酱油，醋，白糖，少许盐 2.热油炒制花椒和干辣椒 3.热花椒油淋到黄瓜上面 4.放入冰箱，第二天就可以吃了", "抖音链接": "", "食材清单": "黄瓜2根、盐适量、糖适量、蒜瓣适量、小米辣3个、酱油2勺、醋1勺、白糖少许、花椒适量、干辣椒3个", "食材（原料）": "黄瓜"},
+{"编号": "17", "菜品名称": "儿菜炒辣椒", "餐次": "正餐", "分类": "素菜", "菜谱步骤": "准备：切片儿菜，撒盐杀水，清洗表面盐，控干备用。1.不放油热锅炒炒儿菜，控干水分并炒干水分 2.小辣椒，蒜粒，豆豉，多量菜籽油大火炒，撒盐，擂出辣椒的虎皮。3.放入儿菜，放入蚝油，酱油，鸡精等大火翻炒即可出锅。喜欢辣椒的，可以放入辣椒面增添味道", "抖音链接": "", "食材清单": "儿菜500克、小辣椒4个、蒜粒适量、豆豉1勺、菜籽油适量、盐适量、蚝油1勺、酱油1勺、鸡精少许、辣椒面适量（可选）", "食材（原料）": "儿菜，小辣椒"},
+{"编号": "18", "菜品名称": "鸡蛋饼", "餐次": "早餐", "分类": "主食", "菜谱步骤": "1.一瓢面粉（小麦粉） 2.两瓢水 3.三个鸡蛋 4.生抽，十三香，鸡精，大量小葱搅拌均匀 5.喷油，一瓢混合液一张饼。大概做4张饼", "抖音链接": "", "食材清单": "面粉250克、水500毫升、鸡蛋3个、生抽适量、十三香少许、鸡精少许、小葱1把", "食材（原料）": "面粉，鸡蛋，小葱"},
+{"编号": "19", "菜品名称": "油焖春笋/茭白", "餐次": "正餐", "分类": "素菜", "菜谱步骤": "1.多油加蒜爆香 2.然后加笋翻炒直至表面金黄 3.加少许盐，白糖多点，生抽，老抽上色，放黄酒（杜绝料酒，有味道） 4.闷8,9分钟 5.喜欢的淋一点芝麻油撒葱花出锅", "抖音链接": "", "食材清单": "春笋或茭白500克、蒜适量、盐少许、白糖适量、生抽1勺、老抽少许、黄酒1勺、芝麻油少许、葱花少许", "食材（原料）": "春笋/茭白"},
+{"编号": "20", "菜品名称": "乡巴佬鸡蛋", "餐次": "早餐", "分类": "荤菜", "菜谱步骤": "1.煮10分钟鸡蛋，拨壳放入电饭煲 2.撒入红烧牛肉面的粉状调料包 3.淋上生抽老抽各一圈 4.倒入冰红茶沫过鸡蛋 5.煮饭键煮熟，并放凉即可食用", "抖音链接": "", "食材清单": "鸡蛋10个、红烧牛肉面调料包1包、生抽适量、老抽适量、冰红茶1瓶", "食材（原料）": "鸡蛋，冰红茶，红烧牛肉面调料包"},
+{"编号": "21", "菜品名称": "清炒丝瓜", "餐次": "正餐", "分类": "素菜", "菜谱步骤": "1.丝瓜切成薄片，搭配一点蒜片 2.放猪油，爆香蒜片 3.丝瓜下锅一直翻炒直至发软 4.加盐调味，加一圈开水 5.中小火咕噜2分钟即可", "抖音链接": "", "食材清单": "丝瓜2根、蒜片适量、猪油适量、盐适量", "食材（原料）": "丝瓜，蒜"},
+{"编号": "22", "菜品名称": "奶油冰淇淋大白兔奶糖", "餐次": "甜品", "分类": "甜品", "菜谱步骤": "1.大白兔20颗，150g牛奶，小火加热熬成浓稠的奶糖酱 2.淡奶油250g打发到稍有纹路，加入奶糖酱拌匀 3.放入冰格模具即可", "抖音链接": "", "食材清单": "大白兔奶糖20颗、牛奶150毫升、淡奶油250毫升", "食材（原料）": "大白兔奶糖，牛奶，淡奶油"},
+{"编号": "23", "菜品名称": "红糖发糕", "餐次": "甜品", "分类": "甜品", "菜谱步骤": "1.一勺红糖，加温水和半勺酵母 2.加面粉搅拌，加至比酸奶浓一点就可以 3.醒30分钟，再次搅拌排气 4.碗底刷油，倒入碗中八分满。加红枣 5.上锅蒸30分钟，闷5分钟即可", "抖音链接": "", "食材清单": "红糖1勺、温水适量、酵母半勺、面粉适量、红枣几颗", "食材（原料）": "红糖，面粉，酵母，红枣"},
+{"编号": "24", "菜品名称": "咸蛋黄瓜汤", "餐次": "正餐", "分类": "汤", "菜谱步骤": "1.汤锅锅底放油，放入咸蛋，捣碎\n2.黄瓜切片一并倒入油锅\n3.黄瓜片煎至金黄，导入热水，炖煮", "抖音链接": "", "食材清单": "咸蛋，黄瓜", "食材（原料）": "咸蛋，黄瓜"},
+{"编号": "25", "菜品名称": "烧烤花菜", "餐次": "正餐", "分类": "素菜", "菜谱步骤": "1. 花菜焯水\n2.放入空气炸锅，放酱油，蚝油，辣椒粉，油等混合均匀\n3.空气炸锅180度15分钟即可", "抖音链接": "", "食材清单": "花菜", "食材（原料）": "花菜"}];
+const NEW_KEY = 'dish_new_items';
+
+function loadNewDishes() {
+  try { return JSON.parse(localStorage.getItem(NEW_KEY)) || []; } catch (e) { return []; }
+}
+function saveNewDishes(items) {
+  localStorage.setItem(NEW_KEY, JSON.stringify(items));
+}
+
+/* ===== 本地服务自动写入（file:// 打开也会自动探测并连接本地服务，全自动写 Excel） ===== */
+const SERVER_PORTS = [8765, 8766, 8767, 8768, 8769, 8770, 8771, 8772, 8773, 8774, 8775];
+let serverPort = null;   // 探测到的本地服务端口缓存
+let probing = false;     // 防止并发探测
+
+function probeServer() {
+  if (serverPort !== null) return Promise.resolve(serverPort);
+  if (probing) return Promise.resolve(null);
+  probing = true;
+  return SERVER_PORTS.reduce(function(chain, port) {
+    return chain.then(function(found) {
+      if (found) return found;
+      return fetch('http://127.0.0.1:' + port + '/api/ping', { method: 'GET' })
+        .then(function(res) {
+          if (res.ok) { serverPort = port; return port; }
+          return null;
+        }).catch(function() { return null; });
+    });
+  }, Promise.resolve(null)).then(function(found) {
+    probing = false;
+    return found;
+  });
+}
+function updateConnBadge() {
+  const b = document.getElementById('connBadge');
+  if (!b) return;
+  probeServer().then(function(port) {
+    if (port) {
+      b.textContent = '已连接自动写入';
+      b.classList.remove('off');
+      b.classList.add('on');
+    } else {
+      b.textContent = '未连接（可手动同步）';
+      b.classList.remove('on');
+      b.classList.add('off');
+    }
+  });
+}
+function apiAddDish(item) {
+  const base = serverPort ? 'http://127.0.0.1:' + serverPort : '';
+  return fetch(base + '/api/add_dish', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(item)
+  }).then(function(res) { return res.json(); });
+}
+function apiSyncRecords(records) {
+  const base = serverPort ? 'http://127.0.0.1:' + serverPort : '';
+  const payload = records.map(function(r) {
+    return { '日期': r.date, '餐次': r.meal, '菜品编号': r.id, '菜品名称': r.name };
+  });
+  return fetch(base + '/api/sync_records', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  }).then(function(res) { return res.json(); });
+}
+(function mergeLocalNewDishes() {
+  let nextId = DISHES.reduce(function(m, d) { return Math.max(m, Number(d['编号']) || 0); }, 0) + 1;
+  loadNewDishes().forEach(function(item) {
+    if (!DISHES.some(function(d) { return d['菜品名称'] === item['菜品名称']; })) {
+      DISHES.push(Object.assign({}, item, { '编号': nextId++, 'isNew': true }));
+    }
+  });
+})();
+let currentMeal = '全部';
+let currentIngredient = '';
+let currentRandomDish = null;
+const RECORD_KEY = 'dish_pick_records';
+
+function fmtSteps(s) {
+  if (!s) return '（此菜品暂无步骤文字）';
+  return s.split(/(?=\d+\.)/).join('\n').trim();
+}
+
+function matchIngredient(d, kw) {
+  const text = (d['食材（原料）'] || '') + ' ' + (d['食材清单'] || '');
+  return text.toLowerCase().includes(kw.toLowerCase());
+}
+
+function render() {
+  let list = currentMeal === '全部' ? DISHES : DISHES.filter(d => d['餐次'] === currentMeal);
+  if (currentIngredient.trim()) {
+    list = list.filter(d => matchIngredient(d, currentIngredient.trim()));
+  }
+  document.getElementById('totalCount').textContent = DISHES.length;
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  if (list.length === 0) {
+    const tip = currentIngredient.trim()
+      ? `没有找到含「${currentIngredient.trim()}」的菜品，换个食材试试吧。`
+      : '该餐次暂无菜品，请在 PDF 中补充后更新。';
+    grid.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:#999;padding:40px;">${tip}</p>`;
+    return;
+  }
+  list.forEach(d => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    const badge = d['isNew'] ? ' <span class="tag new">新</span>' : '';
+    card.innerHTML = `<div class="name">${d['编号']} ${d['菜品名称']}${badge}</div>
+      <div class="tags"><span class="tag meal">${d['餐次']}</span><span class="tag cat">${d['分类']}</span></div>`;
+    card.onclick = () => showDetail(d);
+    grid.appendChild(card);
+  });
+}
+
+function showDetail(d) {
+  document.getElementById('mName').textContent = `${d['编号']} ${d['菜品名称']}`;
+  document.getElementById('mMeta').textContent = `餐次：${d['餐次']} ｜ 分类：${d['分类']}`;
+  const ingr = document.getElementById('mIngr');
+  if (d['食材（原料）']) {
+    ingr.style.display = '';
+    document.getElementById('mIngrText').textContent = d['食材（原料）'];
+  } else {
+    ingr.style.display = 'none';
+  }
+  const shop = document.getElementById('mShop');
+  if (d['食材清单']) {
+    shop.style.display = '';
+    document.getElementById('mShopText').textContent = d['食材清单'];
+  } else {
+    shop.style.display = 'none';
+  }
+  document.getElementById('mSteps').textContent = fmtSteps(d['菜谱步骤']);
+  const btn = document.getElementById('mDouyin');
+  if (d['抖音链接']) {
+    btn.style.display = '';
+    btn.href = d['抖音链接'];
+  } else {
+    btn.style.display = 'none';
+  }
+  document.getElementById('modalMask').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('modalMask').classList.remove('show');
+}
+
+function buildMealOptions() {
+  const meals = ['全部餐次'].concat([...new Set(DISHES.map(d => d['餐次']))].filter(Boolean));
+  const sel = document.getElementById('rMealSelect');
+  sel.innerHTML = '';
+  meals.forEach(m => {
+    const opt = document.createElement('option');
+    opt.value = m;
+    opt.textContent = m;
+    sel.appendChild(opt);
+  });
+}
+
+function initRandom() {
+  updateConnBadge();
+  buildMealOptions();
+  document.getElementById('rPickBtn').addEventListener('click', pickRandom);
+  document.getElementById('rStatBtn').addEventListener('click', openStats);
+  document.getElementById('stExportBtn').addEventListener('click', exportCSV);
+  document.getElementById('stSyncBtn').addEventListener('click', exportRecordsJson);
+  document.getElementById('stNewDishBtn').addEventListener('click', exportNewDishes);
+  document.getElementById('rrAgainBtn').addEventListener('click', pickRandom);
+  document.getElementById('rrConfirmBtn').addEventListener('click', openRandomRecord);
+  document.getElementById('rrDetailBtn').addEventListener('click', function() {
+    if (currentRandomDish) { showDetail(currentRandomDish); }
+  });
+  document.getElementById('adSaveBtn').addEventListener('click', saveNewDish);
+}
+
+function pickRandom() {
+  const meal = document.getElementById('rMealSelect').value;
+  const pool = meal === '全部餐次' ? DISHES : DISHES.filter(d => d['餐次'] === meal);
+  if (pool.length === 0) { alert('该餐次暂无菜品'); return; }
+  const dish = pool[Math.floor(Math.random() * pool.length)];
+  currentRandomDish = dish;
+  document.getElementById('rrName').textContent = dish['编号'] + ' ' + dish['菜品名称'];
+  document.getElementById('rrMeal').textContent = dish['餐次'];
+  document.getElementById('rrCat').textContent = dish['分类'];
+  document.getElementById('rrShop').textContent = '食材清单：' + (dish['食材清单'] || '（暂无食材清单）');
+  document.getElementById('randomResult').style.display = '';
+}
+
+function openRandomRecord() {
+  if (!currentRandomDish) { alert('请先随机选一道菜'); return; }
+  document.getElementById('rRecordName').textContent = currentRandomDish['编号'] + ' ' + currentRandomDish['菜品名称'] + '（' + currentRandomDish['餐次'] + ' / ' + currentRandomDish['分类'] + '）';
+  document.getElementById('rModalMask').classList.add('show');
+}
+
+function closeRandom() {
+  document.getElementById('rModalMask').classList.remove('show');
+}
+
+function loadRecords() {
+  try { return JSON.parse(localStorage.getItem(RECORD_KEY)) || []; } catch (e) { return []; }
+}
+function saveRecords(records) {
+  localStorage.setItem(RECORD_KEY, JSON.stringify(records));
+}
+function todayStr() {
+  const t = new Date();
+  return t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
+}
+function recordSelection(meal) {
+  if (!currentRandomDish) { alert('请先随机选一道菜'); return; }
+  const date = todayStr();
+  const records = loadRecords();
+  const dup = records.find(r => r.date === date && r.meal === meal && r.id === currentRandomDish['编号']);
+  if (dup) {
+    alert('已记录过：' + date + ' ' + meal + ' 已选过《' + currentRandomDish['菜品名称'] + '》（已去重，不重复记录）');
+    return;
+  }
+  records.push({ date: date, meal: meal, id: currentRandomDish['编号'], name: currentRandomDish['菜品名称'] });
+  saveRecords(records);
+  alert('已记录：' + date + ' ' + meal + ' 《' + currentRandomDish['菜品名称'] + '》');
+  closeRandom();
+  pickRandom();
+  probeServer().then(function(port) {
+    if (port) {
+      apiSyncRecords(records).catch(function() {});
+    }
+  });
+}
+
+function openStats() {
+  const records = loadRecords();
+  const totals = { '早餐': 0, '中餐': 0, '晚餐': 0 };
+  const byDate = {};
+  records.forEach(r => {
+    totals[r.meal] = (totals[r.meal] || 0) + 1;
+    if (!byDate[r.date]) byDate[r.date] = { '早餐': 0, '中餐': 0, '晚餐': 0 };
+    byDate[r.date][r.meal] = (byDate[r.date][r.meal] || 0) + 1;
+  });
+  document.getElementById('stTotalBreakfast').textContent = totals['早餐'];
+  document.getElementById('stTotalLunch').textContent = totals['中餐'];
+  document.getElementById('stTotalDinner').textContent = totals['晚餐'];
+  document.getElementById('stTotalAll').textContent = records.length;
+
+  const tbody = document.getElementById('stTableBody');
+  tbody.innerHTML = '';
+  const dates = Object.keys(byDate).sort().reverse();
+  if (dates.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#999;">暂无记录</td></tr>';
+  } else {
+    dates.forEach(d => {
+      const row = byDate[d];
+      const sum = (row['早餐'] || 0) + (row['中餐'] || 0) + (row['晚餐'] || 0);
+      const tr = document.createElement('tr');
+      const td1 = document.createElement('td'); td1.textContent = d;
+      const td2 = document.createElement('td'); td2.textContent = row['早餐'] || 0;
+      const td3 = document.createElement('td'); td3.textContent = row['中餐'] || 0;
+      const td4 = document.createElement('td'); td4.textContent = row['晚餐'] || 0;
+      const td5 = document.createElement('td'); td5.textContent = sum;
+      tr.appendChild(td1); tr.appendChild(td2); tr.appendChild(td3); tr.appendChild(td4); tr.appendChild(td5);
+      tbody.appendChild(tr);
+    });
+  }
+
+  const detail = document.getElementById('stDetailList');
+  detail.innerHTML = '';
+  if (records.length === 0) {
+    const li = document.createElement('li');
+    li.textContent = '暂无记录';
+    li.style.color = '#999';
+    detail.appendChild(li);
+  } else {
+    records.slice().reverse().forEach(r => {
+      const li = document.createElement('li');
+      li.textContent = r.date + '｜' + r.meal + '｜' + r.name + '（#' + r.id + '）';
+      detail.appendChild(li);
+    });
+  }
+  document.getElementById('rStatMask').classList.add('show');
+}
+
+function closeStats() {
+  document.getElementById('rStatMask').classList.remove('show');
+}
+
+function exportRecordsJson() {
+  const records = loadRecords();
+  const payload = records.map(function(r) {
+    return { '日期': r.date, '餐次': r.meal, '菜品编号': r.id, '菜品名称': r.name };
+  });
+  const json = JSON.stringify(payload, null, 2);
+  const blob = new Blob([json], { type: 'application/json;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = '选菜记录_' + todayStr().replace(/-/g, '') + '.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(a.href);
+}
+
+function exportCSV() {
+  const records = loadRecords();
+  const rows = [['日期', '餐次', '菜品编号', '菜品名称']];
+  records.forEach(r => rows.push([r.date, r.meal, r.id, r.name]));
+  const csv = '\ufeff' + rows.map(r => r.join(',')).join('\r\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = '选菜记录_' + todayStr() + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(a.href);
+}
+
+function openAdd() {
+  document.getElementById('adName').value = '';
+  document.getElementById('adMeal').value = '早餐';
+  document.getElementById('adMealCustom').value = '';
+  document.getElementById('adMealCustom').style.display = 'none';
+  document.getElementById('adCat').value = '';
+  document.getElementById('adIngr').value = '';
+  document.getElementById('adSteps').value = '';
+  document.getElementById('adDouyin').value = '';
+  document.getElementById('adShop').value = '';
+  document.getElementById('addMask').classList.add('show');
+}
+
+function closeAdd() {
+  document.getElementById('addMask').classList.remove('show');
+}
+
+function onAddMealChange() {
+  const v = document.getElementById('adMeal').value;
+  document.getElementById('adMealCustom').style.display = v === '自定义' ? '' : 'none';
+}
+
+function saveNewDish() {
+  const name = document.getElementById('adName').value.trim();
+  const mealSel = document.getElementById('adMeal').value;
+  const meal = mealSel === '自定义' ? document.getElementById('adMealCustom').value.trim() : mealSel;
+  if (!name) { alert('请填写菜品名称'); return; }
+  if (!meal) { alert('请填写餐次'); return; }
+  const item = {
+    '菜品名称': name,
+    '餐次': meal,
+    '分类': document.getElementById('adCat').value.trim(),
+    '食材（原料）': document.getElementById('adIngr').value.trim(),
+    '菜谱步骤': document.getElementById('adSteps').value.trim(),
+    '抖音链接': document.getElementById('adDouyin').value.trim(),
+    '食材清单': document.getElementById('adShop').value.trim()
+  };
+  const items = loadNewDishes();
+  if (items.some(x => x['菜品名称'] === name) || DISHES.some(d => d['菜品名称'] === name)) {
+    alert('已存在同名菜品《' + name + '》，未重复添加');
+    return;
+  }
+  items.push(item);
+  saveNewDishes(items);
+  const maxId = DISHES.reduce((m, d) => Math.max(m, Number(d['编号']) || 0), 0);
+  DISHES.push(Object.assign({}, item, { '编号': maxId + 1, 'isNew': true }));
+  render();
+  buildMealOptions();
+  closeAdd();
+  // 全自动：无论 file:// 还是 http:// 打开，都自动探测本地服务并写入 Excel
+  probeServer().then(function(port) {
+    if (!port) {
+      alert('已新增《' + name + '》（编号 ' + (maxId + 1) + '）并已保存到本地。\n未检测到本地服务，请双击「菜品系统.bat」启动后，再点「导出新菜品」即可自动写入 Excel。');
+      return;
+    }
+    return apiAddDish(item).then(function(res) {
+      if (res && res.ok) {
+        // 写入成功，从本地待导入列表移除，避免重复
+        const left = loadNewDishes().filter(function(x) { return x['菜品名称'] !== name; });
+        saveNewDishes(left);
+        alert('已新增《' + name + '》（编号 ' + (res['编号'] || maxId + 1) + '）并已自动写入 Excel。');
+      } else {
+        alert('已新增《' + name + '》但写入 Excel 失败：' + ((res && res['提示']) || '未知错误') + '\n可点「选菜记录」→「导出新菜品」，双击「菜品系统.bat」自动写入。');
+      }
+    }).catch(function() {
+      alert('已新增《' + name + '》（编号 ' + (maxId + 1) + '）并已保存到本地，但写入 Excel 失败（服务异常）。\n可点「选菜记录」→「导出新菜品」，双击「菜品系统.bat」自动写入。');
+    });
+  });
+}
+
+function exportNewDishes() {
+  const items = loadNewDishes();
+  if (items.length === 0) { alert('暂无新增菜品记录，请先点「＋ 新增菜品」添加'); return; }
+  const payload = items.map(function(x) {
+    return {
+      '菜品名称': x['菜品名称'], '餐次': x['餐次'], '分类': x['分类'],
+      '食材（原料）': x['食材（原料）'], '菜谱步骤': x['菜谱步骤'],
+      '抖音链接': x['抖音链接'], '食材清单': x['食材清单']
+    };
+  });
+  const json = JSON.stringify(payload, null, 2);
+  const blob = new Blob([json], { type: 'application/json;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = '新菜品_' + todayStr().replace(/-/g, '') + '.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(a.href);
+  alert('已下载 新菜品_' + todayStr().replace(/-/g, '') + '.json。\n请放到 慧做菜 文件夹或下载目录，双击「菜品系统.bat」自动写入 Excel。');
+}
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentMeal = btn.dataset.meal;
+    render();
+  });
+});
+const ingrFilter = document.getElementById('ingrFilter');
+const ingrClear = document.getElementById('ingrClear');
+if (ingrFilter) {
+  ingrFilter.addEventListener('input', () => {
+    currentIngredient = ingrFilter.value;
+    render();
+  });
+  ingrFilter.addEventListener('keydown', e => {
+    if (e.key === 'Enter') e.preventDefault();
+  });
+}
+if (ingrClear) {
+  ingrClear.addEventListener('click', () => {
+    ingrFilter.value = '';
+    currentIngredient = '';
+    render();
+    ingrFilter.focus();
+  });
+}
+document.getElementById('modalMask').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+document.getElementById('rModalMask').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeRandom();
+});
+document.getElementById('rStatMask').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeStats();
+});
+document.getElementById('addMask').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeAdd();
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closeRandom(); closeStats(); closeAdd(); } });
+
+render();
+initRandom();
+</script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+备份/
+已导入/
+Hui's Menu.pdf
+*.log
+.DS_Store
