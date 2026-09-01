@@ -25,6 +25,10 @@ body { font-family: "Microsoft YaHei", "PingFang SC", sans-serif; background: #f
 .filter-search:focus-within { border-color: #ff6b6b; }
 .filter-search .clear-btn { border: none; background: none; color: #bbb; cursor: pointer; font-size: 14px; padding: 4px; line-height: 1; }
 .filter-search .clear-btn:hover { color: #ff6b6b; }
+.ingr-tags { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; width: 100%; padding: 4px 8px 0; }
+.ingr-tag { padding: 5px 14px; border-radius: 14px; border: 1px solid #e8e2d8; background: #faf8f4; color: #777; font-size: 13px; cursor: pointer; transition: all .2s; }
+.ingr-tag:hover { border-color: #ff9a76; color: #ff6b6b; }
+.ingr-tag.active { background: #ffe3dc; color: #ff6b6b; border-color: #ff9a76; font-weight: 600; }
 .shop-btn { padding: 8px 22px; border-radius: 20px; border: 1px dashed #ccc; background: #f0f0f0; color: #aaa; font-size: 14px; cursor: not-allowed; }
 .random-bar { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 14px 12px; background: #fff8f2; border-bottom: 1px solid #f0e6da; }
 .random-controls { display: flex; justify-content: center; align-items: center; gap: 12px; flex-wrap: wrap; }
@@ -120,6 +124,7 @@ body { font-family: "Microsoft YaHei", "PingFang SC", sans-serif; background: #f
     <input id="ingrFilter" type="text" placeholder="按食材筛选" autocomplete="off" />
     <button class="clear-btn" id="ingrClear" title="清空">×</button>
   </div>
+  <div class="ingr-tags" id="ingrTags"></div>
   <button class="btn-add" onclick="openAdd()">＋ 新增菜品</button>
   <button class="shop-btn" disabled title="即将上线，敬请期待">🛒 购物清单（即将上线）</button>
 </div>
@@ -287,7 +292,8 @@ const DISHES = [{"编号": "1", "菜品名称": "家常豆腐", "餐次": "正�
 {"编号": "25", "菜品名称": "烧烤花菜", "餐次": "正餐", "分类": "素菜", "菜谱步骤": "1. 花菜焯水\n2.放入空气炸锅，放酱油，蚝油，辣椒粉，油等混合均匀\n3.空气炸锅180度15分钟即可", "抖音链接": "", "食材清单": "花菜", "食材（原料）": "花菜"},
 {"编号": "26", "菜品名称": "闷烧丝瓜", "餐次": "正餐", "分类": "素菜", "菜谱步骤": "1.丝瓜切滚刀块，放入锅中\n2.分别放入蒜油、虾米、酱油、蚝油、一点清水\n3.扣上锅盖，中小火焖5分钟", "抖音链接": "", "食材清单": "丝瓜1根、蒜油适量、虾米少许、酱油1勺、蚝油1勺、清水适量", "食材（原料）": "丝瓜"},
 {"编号": "27", "菜品名称": "玉带丝瓜", "餐次": "正餐", "分类": "素菜", "菜谱步骤": "1.炖锅底部放油，蒜瓣铺满锅底，放入两片姜，爆炒至蒜米金黄，取走姜片\n2.放入丝瓜条，撒上盐，盖上锅盖小火焖2分钟\n3.打开翻丝瓜条，再焖2分钟\n4.水焖出来后下入焯过水的虾仁，撒味精和胡椒粉拌匀\n5.大火煮一点水即可上桌", "抖音链接": "", "食材清单": "丝瓜1根、虾仁适量、蒜瓣适量、姜2片、盐适量、味精少许、胡椒粉少许", "食材（原料）": "丝瓜，虾仁"},
-{"编号": "28", "菜品名称": "肉末粉丝煲", "餐次": "正餐", "分类": "荤菜", "菜谱步骤": "", "抖音链接": "", "食材清单": "肉末适量、粉丝1把", "食材（原料）": "肉末，粉丝"}];
+{"编号": "28", "菜品名称": "肉末粉丝煲", "餐次": "正餐", "分类": "荤菜", "菜谱步骤": "", "抖音链接": "", "食材清单": "肉末适量、粉丝1把", "食材（原料）": "肉末，粉丝"},
+{"编号": "29", "菜品名称": "炒方便面", "餐次": "正餐", "分类": "主食", "菜谱步骤": "一、准备食材：主料2块方便面饼；配菜火腿肠、包菜、洋葱、绿豆芽；配料鸡蛋、蒜末；料汁2勺生抽、半勺老抽、1勺香油、1勺辣椒面、少许十三香、少许鸡精。\n二、处理面条：1.锅中水烧开，放入方便面饼煮至7分熟 2.捞出沥干水分，放入大盆 3.往面条喷少许油，用筷子挑开放凉备用。\n三、炒制：1.起锅烧油，倒入蛋液炒散盛出 2.锅中留底油，放入火腿肠片翻炒均匀 3.加蒜末煸出香味 4.放入包菜、洋葱、绿豆芽炒至稍微发软 5.倒入放凉的方便面，加料汁快速翻炒均匀 6.炒至熟透入味即可出锅装盘", "抖音链接": "", "食材清单": "方便面饼2块、火腿肠1根、包菜适量、洋葱适量、绿豆芽适量、鸡蛋1个、蒜末适量、生抽2勺、老抽半勺、香油1勺、辣椒面1勺、十三香少许、鸡精少许", "食材（原料）": "方便面饼，火腿肠，包菜，洋葱，绿豆芽，鸡蛋，蒜末"}];
 const NEW_KEY = 'dish_new_items';
 
 function loadNewDishes() {
@@ -650,6 +656,7 @@ function saveNewDish() {
   const maxId = DISHES.reduce((m, d) => Math.max(m, Number(d['编号']) || 0), 0);
   DISHES.push(Object.assign({}, item, { '编号': maxId + 1, 'isNew': true }));
   render();
+  renderIngrTags();
   buildMealOptions();
   closeAdd();
   // 全自动：无论 file:// 还是 http:// 打开，都自动探测本地服务并写入 Excel
@@ -708,6 +715,7 @@ const ingrClear = document.getElementById('ingrClear');
 if (ingrFilter) {
   ingrFilter.addEventListener('input', () => {
     currentIngredient = ingrFilter.value;
+    syncIngrTagActive();
     render();
   });
   ingrFilter.addEventListener('keydown', e => {
@@ -718,10 +726,65 @@ if (ingrClear) {
   ingrClear.addEventListener('click', () => {
     ingrFilter.value = '';
     currentIngredient = '';
+    syncIngrTagActive();
     render();
     ingrFilter.focus();
   });
 }
+
+/* ===== 食材标签筛选 ===== */
+function cleanIngr(s) {
+  return s
+    .replace(/[\d.]+(个|根|把|勺|瓣|片|颗|克|斤|两|毫升|ml|g)?/g, '')
+    .replace(/适量|少许|若干|少量|一点|一小把|几颗|几瓣|几片|几根|几粒|一撮/g, '')
+    .replace(/[（(][^）)]*[）)]/g, '')
+    .trim();
+}
+function extractIngrTags() {
+  const freq = {};
+  DISHES.forEach(d => {
+    const raw = d['食材（原料）'] || '';
+    const shop = d['食材清单'] || '';
+    const sources = raw ? [raw] : (shop ? [shop] : []);
+    sources.forEach(src => {
+      src.split(/[,，、/;\s]+/).map(cleanIngr).filter(Boolean).forEach(p => {
+        freq[p] = (freq[p] || 0) + 1;
+      });
+    });
+  });
+  return Object.keys(freq).sort((a, b) => freq[b] - freq[a] || a.localeCompare(b, 'zh-Hans-CN'));
+}
+function syncIngrTagActive() {
+  document.querySelectorAll('.ingr-tag').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.ingr === currentIngredient);
+  });
+}
+function renderIngrTags() {
+  const box = document.getElementById('ingrTags');
+  if (!box) return;
+  const tags = extractIngrTags();
+  box.innerHTML = '';
+  tags.forEach(t => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'ingr-tag' + (t === currentIngredient ? ' active' : '');
+    btn.textContent = t;
+    btn.dataset.ingr = t;
+    btn.addEventListener('click', () => {
+      if (currentIngredient === t) {
+        currentIngredient = '';
+        ingrFilter.value = '';
+      } else {
+        currentIngredient = t;
+        ingrFilter.value = t;
+      }
+      syncIngrTagActive();
+      render();
+    });
+    box.appendChild(btn);
+  });
+}
+renderIngrTags();
 document.getElementById('modalMask').addEventListener('click', e => {
   if (e.target === e.currentTarget) closeModal();
 });
