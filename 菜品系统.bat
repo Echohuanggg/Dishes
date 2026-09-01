@@ -1,39 +1,51 @@
 @echo off
-chcp 65001 >nul
+setlocal
 cd /d "%~dp0"
 
-rem æ£€æµ‹ Python ç¯å¢ƒ
+rem ¼ì²â Python »·¾³
 set "PY="
 where python >nul 2>nul && set "PY=python"
 if not defined PY ( where py >nul 2>nul && set "PY=py" )
 if not defined PY (
     echo ============================================
-    echo   èœå“é€‰æ‹©ç³»ç»Ÿ - ä¸€é”®å¯åŠ¨
+    echo   ²ËÆ·Ñ¡ÔñÏµÍ³ - Ò»¼üÆô¶¯
     echo ============================================
     echo.
-    echo æœªæ£€æµ‹åˆ° Python ç¯å¢ƒã€‚
-    echo è¯·å…ˆå®‰è£… Pythonï¼ˆhttps://www.python.org/downloads/ï¼‰åé‡è¯•ã€‚
+    echo Î´¼ì²âµ½ Python »·¾³¡£
+    echo ÇëÏÈ°²×° Python£¨https://www.python.org/downloads/£©ºóÖØÊÔ¡£
     echo.
     pause
     exit /b 1
 )
 
 echo ============================================
-echo   èœå“é€‰æ‹©ç³»ç»Ÿ - ä¸€é”®å¯åŠ¨
+echo   ²ËÆ·Ñ¡ÔñÏµÍ³ - Ò»¼üÆô¶¯
 echo ============================================
 echo.
-echo [1/3] åŒæ­¥æœ¬åœ°é€‰èœè®°å½•åˆ° Excel ...
-%PY% sync_records.py --no-pause
+echo [1/3] Í¬²½±¾µØÑ¡²Ë¼ÇÂ¼µ½ Excel ...
+%PY% "%~dp0sync_records.py" --no-pause
 echo.
-echo [2/3] æ¯”å¯¹æ›´æ–° HTML èœå“æ•°æ®ï¼ˆExcel æœ€æ–°æ•°æ®åŒæ­¥åˆ°é¡µé¢ï¼‰...
-%PY% update_html.py --no-pause
+echo [2/3] ±È¶Ô¸üĞÂ HTML ²ËÆ·Êı¾İ ...
+%PY% "%~dp0update_html.py" --no-pause
 echo.
-echo [3/3] å¯åŠ¨èœå“ç³»ç»ŸæœåŠ¡ï¼ˆåå°è¿è¡Œï¼Œç”¨äºæ–°å¢èœå“/é€‰èœè®°å½•è‡ªåŠ¨å†™ Excelï¼‰...
-start "èœå“ç³»ç»ŸæœåŠ¡" %PY% èœå“ç³»ç»ŸæœåŠ¡.py --no-browser
+echo [3/3] Æô¶¯²ËÆ·ÏµÍ³·şÎñ£¨ºóÌ¨ÔËĞĞ£©...
+start "²ËÆ·ÏµÍ³·şÎñ" %PY% "%~dp0²ËÆ·ÏµÍ³·şÎñ.py" --no-browser
 timeout /t 2 /nobreak >nul
-echo        æ‰“å¼€æœ€æ–°é¡µé¢ ...
-start "" "èœå“é€‰æ‹©.html"
+echo       ´ò¿ª×îĞÂÒ³Ãæ ...
+
+rem Ì½²âä¯ÀÀÆ÷´ò¿ªÒ³Ãæ£¨±ÜÃâ .html ¹ØÁªÒì³£µ¼ÖÂ´ò²»¿ª£©
+set "BROWSER="
+if exist "%ProgramFiles(x86)%\Microsoft\Edge\Application\msedge.exe" set "BROWSER=%ProgramFiles(x86)%\Microsoft\Edge\Application\msedge.exe"
+if not defined BROWSER if exist "%ProgramFiles%\Microsoft\Edge\Application\msedge.exe" set "BROWSER=%ProgramFiles%\Microsoft\Edge\Application\msedge.exe"
+if not defined BROWSER if exist "%ProgramFiles%\Google\Chrome\Application\chrome.exe" set "BROWSER=%ProgramFiles%\Google\Chrome\Application\chrome.exe"
+if not defined BROWSER if exist "%ProgramFiles(x86)%\Google\Chrome\Application\chrome.exe" set "BROWSER=%ProgramFiles(x86)%\Google\Chrome\Application\chrome.exe"
+if not defined BROWSER if exist "%ProgramFiles%\Mozilla Firefox\firefox.exe" set "BROWSER=%ProgramFiles%\Mozilla Firefox\firefox.exe"
+if defined BROWSER (
+    start "" "%BROWSER%" "%~dp0²ËÆ·Ñ¡Ôñ.html"
+) else (
+    start "" "%~dp0²ËÆ·Ñ¡Ôñ.html"
+)
 echo.
-echo å¦‚é¡µé¢æ˜¾ç¤º"æœªè¿æ¥"ï¼Œè¯·ç¨ç­‰ 2~3 ç§’ååˆ·æ–°é¡µé¢ã€‚
+echo ÈçÒ³ÃæÏÔÊ¾"Î´Á¬½Ó"£¬ÇëÉÔµÈ 2~3 ÃëºóË¢ĞÂÒ³Ãæ¡£
 echo.
 pause
