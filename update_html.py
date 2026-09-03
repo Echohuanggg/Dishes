@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-update_html.py - 将 菜品数据.xlsx 的最新菜品数据同步到 菜品选择.html 的内嵌 DISHES 数组。
+update_html.py - 将 菜品数据.xlsx 的最新菜品数据同步到 index.html 的内嵌 DISHES 数组。
 用法: python update_html.py [--no-pause]
 - 自动比对 Excel 与 HTML 内嵌数据，有变化才写回
 - Excel 被占用（Excel 打开中）会给出明确提示
@@ -13,7 +13,7 @@ import sys
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 EXCEL_FILE = os.path.join(BASE_DIR, "菜品数据.xlsx")
-HTML_FILE = os.path.join(BASE_DIR, "菜品选择.html")
+HTML_FILE = os.path.join(BASE_DIR, "index.html")
 FIELDS = ["编号", "菜品名称", "餐次", "分类", "菜谱步骤", "抖音链接", "食材清单", "食材（原料）"]
 
 
@@ -68,7 +68,7 @@ def main():
         with open(HTML_FILE, encoding="utf-8") as f:
             content = f.read()
     except OSError:
-        print("[错误] 未找到 菜品选择.html")
+        print("[错误] 未找到 index.html")
         if not args.no_pause:
             input("按回车键退出...")
         return 1
@@ -77,7 +77,7 @@ def main():
     pattern = re.compile(r"const DISHES = \[.*?\];", re.S)
     m = pattern.search(content)
     if not m:
-        print("[错误] 未在 HTML 中找到 DISHES 数组，请确认 菜品选择.html 未损坏。")
+        print("[错误] 未在 HTML 中找到 DISHES 数组，请确认 index.html 未损坏。")
         if not args.no_pause:
             input("按回车键退出...")
         return 1

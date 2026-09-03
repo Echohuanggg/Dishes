@@ -41,9 +41,9 @@ if not defined BROWSER if exist "%ProgramFiles%\Google\Chrome\Application\chrome
 if not defined BROWSER if exist "%ProgramFiles(x86)%\Google\Chrome\Application\chrome.exe" set "BROWSER=%ProgramFiles(x86)%\Google\Chrome\Application\chrome.exe"
 if not defined BROWSER if exist "%ProgramFiles%\Mozilla Firefox\firefox.exe" set "BROWSER=%ProgramFiles%\Mozilla Firefox\firefox.exe"
 if defined BROWSER (
-    start "" "%BROWSER%" "%~dp0菜品选择.html"
+    start "" "%BROWSER%" "%~dp0index.html"
 ) else (
-    start "" "%~dp0菜品选择.html"
+    start "" "%~dp0index.html"
 )
 echo.
 echo 如页面显示"未连接"，请稍等 2~3 秒后刷新页面。

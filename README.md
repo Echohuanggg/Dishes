@@ -13,7 +13,7 @@ AIGC:
 
 个人家常菜谱管理小工具：25 道菜谱浏览、餐次筛选、按食材搜索、随机选菜、菜谱查看、新增菜品。
 
-在线访问（GitHub Pages）：`https://<你的用户名>.github.io/<仓库名>/菜品选择.html`
+在线访问（GitHub Pages）：`https://<你的用户名>.github.io/<仓库名>/`
 
 ## 功能
 
@@ -41,7 +41,7 @@ AIGC:
 
 | 文件 | 说明 |
 |------|------|
-| 菜品选择.html | 单文件页面（数据内嵌），电脑/手机通用，双击即可打开 |
+| index.html | 单文件页面（数据内嵌），电脑/手机通用，双击即可打开 |
 | 菜品数据.xlsx | 数据源：25 道菜 + 选菜记录 + 统计报表 |
 | 菜品系统服务.py | 本地 Python 服务，负责页面与 Excel 之间的读写中转 |
 | sync_records.py | 选菜记录同步脚本 |
@@ -64,7 +64,7 @@ AIGC:
 
 1. 在 GitHub 创建公开仓库（如 `dish-menu`），把本目录文件推上去
 2. 仓库 Settings → Pages → Source 选择 `main` 分支 + `/(root)` → Save
-3. 等 1~2 分钟，访问 `https://<用户名>.github.io/<仓库名>/菜品选择.html`
+3. 等 1~2 分钟，访问 `https://<用户名>.github.io/<仓库名>/`
 
 > 注意：仓库转 private 会自动停用 Pages；转回 public 后需到 Settings → Pages 重新选择分支保存一次。
 *（内容由AI生成，仅供参考）*

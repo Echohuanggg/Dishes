@@ -3,7 +3,7 @@
 菜品系统本地服务：HTTP 中转，实现「HTML 加菜/记录 -> 自动写入 Excel」全自动流程。
 - 零依赖（仅 Python 标准库 http.server + openpyxl）
 - 端口默认 8765，被占用时自动递增找空闲端口
-- GET  /              -> 返回同目录 菜品选择.html
+- GET  /              -> 返回同目录 index.html
 - POST /api/add_dish  -> 新增菜品写入 菜品数据.xlsx（按名称去重、编号顺延、重建统计报表）
 - POST /api/sync_records -> 选菜记录合并去重写入 Excel
 """
@@ -21,7 +21,7 @@ except ImportError:
     openpyxl = None
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-HTML_FILE = os.path.join(BASE_DIR, "菜品选择.html")
+HTML_FILE = os.path.join(BASE_DIR, "index.html")
 EXCEL_FILE = os.path.join(BASE_DIR, "菜品数据.xlsx")
 
 DATA_HEADERS = ["编号", "菜品名称", "餐次", "分类", "食材（原料）", "菜谱步骤", "抖音链接", "食材清单"]
@@ -260,7 +260,7 @@ class Handler(BaseHTTPRequestHandler):
             with open(HTML_FILE, "rb") as f:
                 data = f.read()
         except OSError:
-            self._send_json({"ok": False, "提示": "未找到 菜品选择.html"}, status=500)
+            self._send_json({"ok": False, "提示": "未找到 index.html"}, status=500)
             return
         self.send_response(status)
         self.send_header("Content-Type", "text/html; charset=utf-8")
