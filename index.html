@@ -735,12 +735,17 @@ if (ingrClear) {
 }
 
 /* ===== 食材标签筛选 ===== */
+/* 佐料/小料/调味料黑名单：筛选栏只保留蔬菜、肉类等可当主菜的食材大类 */
+const INGR_BLACKLIST = ['姜', '蒜', '葱', '盐', '糖', '油', '料酒', '黄酒', '生抽', '老抽', '酱油', '醋', '淀粉', '香油', '胡椒粉', '胡椒', '味精', '鸡精', '花椒', '辣椒', '芝麻', '酱', '蚝油', '八角', '十三香', '豆豉', '酵母', '腐乳'];
 function cleanIngr(s) {
   return s
     .replace(/[\d.]+(个|根|把|勺|瓣|片|颗|克|斤|两|毫升|ml|g)?/g, '')
     .replace(/适量|少许|若干|少量|一点|一小把|几颗|几瓣|几片|几根|几粒|一撮/g, '')
     .replace(/[（(][^）)]*[）)]/g, '')
     .trim();
+}
+function isSeasoning(tag) {
+  return INGR_BLACKLIST.some(w => tag.includes(w));
 }
 function extractIngrTags() {
   const freq = {};
@@ -750,6 +755,7 @@ function extractIngrTags() {
     const sources = raw ? [raw] : (shop ? [shop] : []);
     sources.forEach(src => {
       src.split(/[,，、/;\s]+/).map(cleanIngr).filter(Boolean).forEach(p => {
+        if (isSeasoning(p)) return; // 剔除佐料小料调味料标签
         freq[p] = (freq[p] || 0) + 1;
       });
     });
