@@ -4,121 +4,408 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="author" content="Hui">
+<meta name="description" content="慧的菜品选择系统：按餐次与食材快速筛选，随机选菜并记录每日三餐，本地个人菜单工具。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%23b6532b'/%3E%3Ctext x='32' y='44' font-size='32' text-anchor='middle' fill='%23fffdf7' font-family='sans-serif'%3E%E9%A5%AD%3C/text%3E%3C/svg%3E">
 <title>慧的菜品选择系统</title>
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: "Microsoft YaHei", "PingFang SC", sans-serif; background: #f7f5f0; color: #333; }
-.header { background: linear-gradient(135deg, #ff9a56, #ff6b6b); color: #fff; padding: 28px 20px; text-align: center; }
-.header h1 { font-size: 28px; margin-bottom: 6px; }
-.header p { font-size: 14px; opacity: 0.9; }
-.conn-badge { display: inline-block; margin-top: 10px; padding: 4px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; background: #fff; }
-.conn-badge.on { color: #2e7d32; }
-.conn-badge.off { color: #9e9e9e; }
-.filter-bar { display: flex; justify-content: center; gap: 12px; padding: 18px 12px; flex-wrap: wrap; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.06); position: sticky; top: 0; z-index: 10; }
-.filter-btn { padding: 8px 22px; border-radius: 20px; border: 1px solid #e0dcd3; background: #fff; color: #555; font-size: 14px; cursor: pointer; transition: all .2s; }
-.filter-btn:hover { border-color: #ff6b6b; color: #ff6b6b; }
-.filter-btn.active { background: #ff6b6b; color: #fff; border-color: #ff6b6b; }
-.filter-search { display: flex; align-items: center; gap: 8px; padding: 0 14px; border: 1px solid #e0dcd3; border-radius: 20px; background: #fff; }
-.filter-search input { border: none; outline: none; padding: 8px 0; font-size: 14px; color: #555; width: 150px; background: transparent; }
-.filter-search input::placeholder { color: #bbb; }
-.filter-search .search-icon { color: #bbb; font-size: 14px; }
-.filter-search:focus-within { border-color: #ff6b6b; }
-.filter-search .clear-btn { border: none; background: none; color: #bbb; cursor: pointer; font-size: 14px; padding: 4px; line-height: 1; }
-.filter-search .clear-btn:hover { color: #ff6b6b; }
-.ingr-tags { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; width: 100%; padding: 4px 8px 0; }
-.ingr-tag { padding: 5px 14px; border-radius: 14px; border: 1px solid #e8e2d8; background: #faf8f4; color: #777; font-size: 13px; cursor: pointer; transition: all .2s; }
-.ingr-tag:hover { border-color: #ff9a76; color: #ff6b6b; }
-.ingr-tag.active { background: #ffe3dc; color: #ff6b6b; border-color: #ff9a76; font-weight: 600; }
-.shop-btn { padding: 8px 22px; border-radius: 20px; border: 1px dashed #ccc; background: #f0f0f0; color: #aaa; font-size: 14px; cursor: not-allowed; }
-.random-bar { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 14px 12px; background: #fff8f2; border-bottom: 1px solid #f0e6da; }
-.random-controls { display: flex; justify-content: center; align-items: center; gap: 12px; flex-wrap: wrap; }
-.random-result { display: flex; align-items: center; justify-content: center; gap: 20px; background: #fff; border: 1px solid #f0e6da; border-radius: 14px; padding: 16px 20px; width: 100%; max-width: 760px; flex-wrap: wrap; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-.rr-info { flex: 1; min-width: 260px; }
-.rr-name { font-size: 18px; font-weight: 600; margin-bottom: 6px; color: #333; }
-.rr-shop { font-size: 13px; color: #777; margin-top: 8px; line-height: 1.7; }
-.rr-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-.random-label { font-size: 14px; color: #e8890c; font-weight: 600; }
-.random-select { padding: 8px 14px; border-radius: 10px; border: 1px solid #e0dcd3; font-size: 14px; background: #fff; color: #555; cursor: pointer; outline: none; }
-.random-select:focus { border-color: #ff6b6b; }
-.btn-random { padding: 8px 22px; border-radius: 20px; border: none; background: linear-gradient(135deg, #ff9a56, #ff6b6b); color: #fff; font-size: 14px; cursor: pointer; transition: opacity .2s; }
-.btn-random:hover { opacity: 0.85; }
-.btn-stat { padding: 8px 18px; border-radius: 20px; border: 1px solid #e0dcd3; background: #fff; color: #555; font-size: 14px; cursor: pointer; transition: all .2s; }
-.btn-stat:hover { border-color: #ff6b6b; color: #ff6b6b; }
-.btn-rec { padding: 8px 14px; border-radius: 10px; border: 1px solid #ffb28a; background: #fff8f2; color: #e8890c; font-size: 13px; cursor: pointer; transition: all .2s; }
-.btn-rec:hover { background: #ff6b6b; color: #fff; border-color: #ff6b6b; }
-.stat-totals { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
-.stat-total { background: #fff3e6; color: #e8890c; border-radius: 12px; padding: 6px 14px; font-size: 13px; }
-.stat-total b { font-size: 16px; }
-.stat-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-.stat-table th, .stat-table td { border: 1px solid #eee; padding: 8px 10px; text-align: center; }
-.stat-table th { background: #faf6ef; color: #888; font-weight: 600; }
-.stat-detail { list-style: none; padding: 0; margin: 0; max-height: 180px; overflow-y: auto; font-size: 13px; color: #555; line-height: 1.8; }
-.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; padding: 24px; max-width: 1200px; margin: 0 auto; }
-.card { background: #fff; border-radius: 14px; padding: 20px 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.07); cursor: pointer; transition: transform .15s, box-shadow .15s; border: 1px solid #eee; }
-.card:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,0.12); }
-.card .name { font-size: 17px; font-weight: 600; margin-bottom: 10px; }
-.tags { display: flex; gap: 8px; flex-wrap: wrap; }
-.tag { font-size: 12px; padding: 3px 10px; border-radius: 12px; background: #f3f0ea; color: #777; }
-.tag.meal { background: #fff3e6; color: #e8890c; }
-.tag.cat { background: #e8f4ff; color: #2b7bd8; }
-.modal-mask { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 100; justify-content: center; align-items: center; padding: 20px; }
-.modal-mask.show { display: flex; }
-.modal { background: #fff; border-radius: 16px; max-width: 640px; width: 100%; max-height: 82vh; overflow-y: auto; padding: 26px 28px; position: relative; }
-.modal h2 { font-size: 22px; margin-bottom: 12px; }
-.modal .meta { font-size: 13px; color: #888; margin-bottom: 14px; display: flex; gap: 10px; flex-wrap: wrap; }
-.modal .section { margin-bottom: 14px; }
-.modal .section h3 { font-size: 15px; color: #ff6b6b; margin-bottom: 6px; }
-.modal .steps { white-space: pre-wrap; line-height: 1.9; font-size: 14px; color: #444; background: #faf8f4; border-radius: 10px; padding: 14px 16px; }
-.modal .btn-row { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
-.btn-douyin { display: inline-block; padding: 10px 20px; background: #000; color: #fff; border-radius: 10px; text-decoration: none; font-size: 14px; }
-.btn-close { padding: 10px 20px; background: #f0ece4; color: #666; border: none; border-radius: 10px; font-size: 14px; cursor: pointer; }
-.tag.new { background: #ff6b6b; color: #fff; }
-.btn-add { padding: 8px 22px; border-radius: 20px; border: 1px dashed #4caf50; background: #f2fbf2; color: #2e7d32; font-size: 14px; cursor: pointer; transition: all .2s; }
-.btn-add:hover { background: #4caf50; color: #fff; border-color: #4caf50; }
-.form-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; }
-.form-row label { width: 84px; flex-shrink: 0; font-size: 13px; color: #666; line-height: 32px; }
-.form-row label .req { color: #ff6b6b; }
-.form-row input[type="text"], .form-row textarea, .form-row select { flex: 1; padding: 7px 10px; border: 1px solid #e0dcd3; border-radius: 8px; font-size: 13px; outline: none; font-family: inherit; }
-.form-row input[type="text"]:focus, .form-row textarea:focus, .form-row select:focus { border-color: #ff6b6b; }
-.form-row textarea { resize: vertical; min-height: 72px; line-height: 1.6; }
-.form-row .meal-custom { flex: 1; }
-.footer { text-align: center; padding: 20px; color: #aaa; font-size: 12px; }
-@media (max-width: 768px) {
-  .header { padding: 18px 12px; }
-  .header h1 { font-size: 22px; }
-  .header p { font-size: 12px; }
-  .filter-bar { gap: 8px; padding: 12px 8px; }
-  .filter-btn { padding: 6px 13px; font-size: 13px; }
-  .filter-search { flex: 1 1 auto; min-width: 130px; }
-  .filter-search input { width: 100%; font-size: 13px; }
-  .btn-add, .shop-btn { padding: 6px 14px; font-size: 13px; }
-  .random-bar { padding: 12px 8px; gap: 10px; }
-  .random-result { padding: 12px 10px; gap: 10px; }
-  .rr-info { min-width: 100%; }
-  .rr-actions { width: 100%; justify-content: center; }
-  .grid { padding: 14px 10px; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
-  .card { padding: 14px 12px; }
-  .card .name { font-size: 15px; }
-  .modal { padding: 18px 16px; max-height: 88vh; }
-  .modal h2 { font-size: 19px; }
-  .modal .steps { font-size: 13px; padding: 12px; }
-  .form-row { flex-direction: column; gap: 4px; }
-  .form-row label { width: auto; line-height: 1.6; }
-  .stat-table th, .stat-table td { padding: 6px; font-size: 12px; }
+:root{
+  --bg1:#fff6e8; --bg2:#fff0d8;
+  --surface:#ffffff;
+  --surface-2:#fff3e3;
+  --ink:#3b2a1e;
+  --ink-2:#8a6a4a;
+  --ink-3:#b3946e;
+  --line:#f2dfc2;
+  --line-strong:#e8cd9f;
+  --fire:#ff5a36; --fire-deep:#e0401e; --fire-soft:#ffe0d2; --fire-softer:#fff0e8;
+  --sun:#ffb027; --sun-deep:#e8910a; --sun-soft:#ffecbf; --sun-softer:#fff6dd;
+  --cream-deep:#ffe9c8;
+  --r-xl:26px; --r-lg:20px; --r-md:16px; --r-sm:12px;
+  --sh-sm:0 2px 6px rgba(190,110,50,.10), 0 8px 20px -12px rgba(190,110,50,.20);
+  --sh-md:0 4px 10px rgba(190,110,50,.12), 0 20px 38px -16px rgba(224,80,20,.26);
+  --sh-lg:0 28px 70px -22px rgba(150,60,10,.38);
+  --z-sticky:30; --z-modal:120;
+  --t:.22s; --ease:cubic-bezier(.22,.61,.36,1);
 }
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body{
+  font-family:"HarmonyOS Sans SC","MiSans","PingFang SC","Microsoft YaHei UI","Microsoft YaHei",system-ui,-apple-system,sans-serif;
+  background:
+    radial-gradient(1100px 460px at 82% -120px, rgba(255,190,80,.32), transparent 62%),
+    radial-gradient(950px 420px at -6% -80px, rgba(255,110,60,.16), transparent 58%),
+    linear-gradient(180deg, var(--bg1), var(--bg2));
+  background-attachment:fixed;
+  color:var(--ink);
+  font-variant-numeric:tabular-nums;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+body::after{
+  content:""; position:fixed; inset:0; z-index:200; pointer-events:none; opacity:.035;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+}
+::selection{ background:var(--fire); color:#fff; }
+button{ font:inherit; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible{
+  outline:2px solid var(--fire); outline-offset:2px;
+}
+
+/* ===== 顶部餐巾条纹 ===== */
+.topbar{
+  height:9px;
+  background:repeating-linear-gradient(90deg, var(--fire) 0 26px, #fff7ea 26px 52px);
+}
+
+/* ===== Header ===== */
+.header{
+  position:relative; padding:44px 20px 42px; text-align:center;
+  background:
+    radial-gradient(560px 190px at 50% -60px, rgba(255,176,39,.30), transparent 72%);
+}
+.logo{
+  width:84px; height:84px; margin:0 auto 18px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:42px; line-height:1;
+  background:radial-gradient(circle at 32% 28%, #ffffff, #ffd9a8 68%, #ffc37e);
+  border:3px solid rgba(255,255,255,.85);
+  box-shadow:0 10px 26px -8px rgba(224,120,40,.55), inset 0 -4px 10px rgba(224,140,60,.28);
+  transition:transform .3s var(--ease);
+  animation:bob 5s ease-in-out infinite;
+}
+.logo:hover{ transform:scale(1.1) rotate(-6deg); }
+@keyframes bob{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-5px); } }
+.header h1{
+  font-family:"YouYuan","幼圆","PingFang SC","Microsoft YaHei UI",sans-serif;
+  font-size:42px; font-weight:700; color:var(--ink); line-height:1.2; letter-spacing:.02em;
+  text-shadow:0 1px 0 #fff;
+}
+.header p{ margin-top:10px; font-size:14.5px; color:var(--ink-2); }
+.header p #totalCount{ color:var(--fire-deep); font-weight:800; font-size:18px; padding:0 2px; }
+.conn-badge{
+  display:inline-flex; align-items:center; gap:8px; margin-top:16px;
+  padding:6px 16px; border-radius:999px; font-size:12px; font-weight:600;
+  background:rgba(255,255,255,.7); border:1px solid var(--line); color:var(--ink-2);
+  -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px);
+  box-shadow:var(--sh-sm);
+}
+.conn-badge::before{ content:""; width:8px; height:8px; border-radius:50%; background:#d8bea0; }
+.conn-badge.on{ color:#3f7a34; border-color:#d7e8cd; background:rgba(240,250,234,.9); }
+.conn-badge.on::before{ background:#5faf4b; box-shadow:0 0 0 3px rgba(95,175,75,.2); }
+
+/* ===== 筛选栏 ===== */
+.filter-bar{
+  position:sticky; top:0; z-index:var(--z-sticky);
+  display:flex; justify-content:center; align-items:center; gap:10px; flex-wrap:wrap;
+  padding:15px 16px;
+  background:rgba(255,250,240,.88);
+  -webkit-backdrop-filter:blur(12px) saturate(1.2); backdrop-filter:blur(12px) saturate(1.2);
+  border-bottom:1px solid rgba(232,205,159,.7);
+  box-shadow:0 14px 30px -26px rgba(200,110,40,.55);
+}
+.filter-btn{
+  padding:8px 18px; border-radius:999px; border:1px solid transparent;
+  background:transparent; color:var(--ink-2); font-size:14px; font-weight:600;
+  cursor:pointer; transition:all var(--t) var(--ease);
+}
+.filter-btn:hover{ color:var(--fire-deep); background:rgba(255,255,255,.9); box-shadow:var(--sh-sm); }
+.filter-btn.active{
+  background:linear-gradient(180deg,#ff8350,var(--fire)); color:#fff;
+  box-shadow:0 5px 14px -4px rgba(255,90,54,.55), inset 0 1px 0 rgba(255,255,255,.35);
+}
+.filter-search{
+  display:inline-flex; align-items:center; gap:7px;
+  padding:7px 14px; border-radius:999px; border:2px solid var(--line-strong);
+  background:var(--surface); transition:border-color var(--t) var(--ease), box-shadow var(--t) var(--ease);
+}
+.filter-search:focus-within{ border-color:var(--fire); box-shadow:0 0 0 4px rgba(255,90,54,.14); }
+.filter-search .search-icon{ color:var(--ink-3); font-size:14px; line-height:1; }
+.filter-search input{
+  border:none; outline:none; padding:5px 0; font:inherit; font-size:14px; color:var(--ink);
+  width:150px; background:transparent;
+}
+.filter-search input::placeholder{ color:#cbb494; }
+.filter-search .clear-btn{
+  border:none; background:none; color:var(--ink-3); cursor:pointer; font-size:16px; line-height:1;
+  padding:2px 5px; border-radius:50%; transition:color var(--t), background var(--t);
+}
+.filter-search .clear-btn:hover{ color:#fff; background:var(--fire); }
+.ingr-tags{ display:flex; flex-wrap:wrap; justify-content:center; gap:8px; width:100%; padding:8px 8px 2px; }
+.ingr-tag{
+  padding:5px 14px; border-radius:999px; border:1px solid var(--line);
+  background:var(--surface); color:var(--ink-3); font-size:13px; font-weight:500; cursor:pointer;
+  transition:all var(--t) var(--ease);
+}
+.ingr-tag:hover{ border-color:var(--sun-deep); color:#a86e00; transform:translateY(-2px); box-shadow:var(--sh-sm); }
+.ingr-tag.active{
+  background:var(--sun-soft); color:#9a6400; border-color:var(--sun-deep);
+  font-weight:700; box-shadow:0 4px 10px -4px rgba(232,145,10,.45);
+}
+.btn-add{
+  padding:9px 19px; border-radius:999px; border:2px dashed var(--fire);
+  background:var(--fire-softer); color:var(--fire-deep); font-size:14px; font-weight:700;
+  cursor:pointer; transition:all var(--t) var(--ease);
+}
+.btn-add:hover{ background:var(--fire); color:#fff; border-style:solid; transform:translateY(-1px); box-shadow:0 8px 18px -6px rgba(255,90,54,.5); }
+.shop-btn{
+  padding:8px 17px; border-radius:999px; border:1px solid var(--line);
+  background:rgba(255,255,255,.6); color:var(--ink-3); font-size:13px; font-weight:500;
+  cursor:not-allowed;
+}
+
+/* ===== 随机选菜区 ===== */
+.random-bar{
+  display:flex; flex-direction:column; align-items:center; gap:16px;
+  padding:26px 16px 30px;
+  background:
+    radial-gradient(500px 190px at 50% -80px, rgba(255,176,39,.28), transparent 70%),
+    linear-gradient(180deg, #ffe9c8, rgba(255,240,216,0) 85%);
+  border-bottom:1px solid rgba(232,205,159,.7);
+}
+.random-controls{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; justify-content:center; }
+.random-label{
+  display:inline-flex; align-items:center; gap:7px;
+  padding:8px 16px; border-radius:999px;
+  background:rgba(255,255,255,.75); border:1px solid var(--line);
+  font-size:13.5px; font-weight:800; color:var(--fire-deep);
+  box-shadow:var(--sh-sm);
+}
+.random-select{
+  padding:9px 15px; border-radius:999px; border:2px solid var(--line-strong);
+  font:inherit; font-size:14px; font-weight:600; background:var(--surface); color:var(--ink);
+  cursor:pointer; outline:none; transition:border-color var(--t), box-shadow var(--t);
+}
+.random-select:focus{ border-color:var(--fire); box-shadow:0 0 0 4px rgba(255,90,54,.14); }
+.btn-random{
+  padding:13px 34px; border:none; border-radius:999px;
+  background:linear-gradient(180deg,#ff8a4d,var(--fire) 55%,var(--fire-deep));
+  color:#fff; font-size:16px; font-weight:800; letter-spacing:.04em; cursor:pointer;
+  box-shadow:0 6px 0 #c23a17, 0 16px 28px -10px rgba(255,90,54,.6), inset 0 2px 0 rgba(255,255,255,.35);
+  transition:all .12s var(--ease);
+  text-shadow:0 1px 2px rgba(160,40,0,.35);
+}
+.btn-random:hover{ transform:translateY(-2px); box-shadow:0 8px 0 #c23a17, 0 20px 30px -10px rgba(255,90,54,.55), inset 0 2px 0 rgba(255,255,255,.35); filter:brightness(1.04); }
+.btn-random:active{ transform:translateY(4px); box-shadow:0 2px 0 #c23a17, 0 8px 16px -8px rgba(255,90,54,.5), inset 0 2px 0 rgba(255,255,255,.35); }
+.btn-stat{
+  padding:9px 20px; border-radius:999px; border:2px solid var(--sun-deep);
+  background:var(--sun-softer); color:#a86e00; font-size:14px; font-weight:700; cursor:pointer;
+  transition:all var(--t) var(--ease);
+}
+.btn-stat:hover{ background:var(--sun); color:#fff; transform:translateY(-1px); box-shadow:0 8px 18px -6px rgba(232,145,10,.5); }
+.btn-rec{
+  padding:8px 18px; border-radius:999px; border:2px solid transparent;
+  background:var(--fire-soft); color:var(--fire-deep); font-size:13.5px; font-weight:700;
+  cursor:pointer; transition:all var(--t) var(--ease);
+}
+.btn-rec:hover{ background:var(--fire); color:#fff; }
+.btn-again{
+  padding:9px 20px; border:2px solid var(--fire); border-radius:999px;
+  background:rgba(255,255,255,.75); color:var(--fire-deep); font-size:14px; font-weight:700;
+  cursor:pointer; transition:all var(--t) var(--ease);
+}
+.btn-again:hover{ background:var(--fire-soft); transform:translateY(-1px); }
+.random-result{
+  display:flex; align-items:center; gap:24px; flex-wrap:wrap;
+  width:100%; max-width:800px; padding:24px 28px;
+  background:var(--surface); border:1px solid rgba(240,220,180,.9); border-radius:var(--r-lg);
+  box-shadow:var(--sh-md), inset 0 3px 0 rgba(255,220,150,.6);
+}
+.rr-info{ flex:1; min-width:260px; }
+.rr-name{ font-size:21px; font-weight:800; color:var(--ink); }
+.rr-name::before{ content:"🍲 "; }
+.rr-shop{ font-size:13.5px; color:var(--ink-2); margin-top:8px; line-height:1.7; }
+.random-result .btn-rec{ background:linear-gradient(180deg,#ff8350,var(--fire)); color:#fff; box-shadow:0 4px 12px -4px rgba(255,90,54,.5); }
+.random-result .btn-rec:hover{ background:var(--fire-deep); }
+.rr-actions{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+
+/* ===== 统计 ===== */
+.stat-totals{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px; }
+.stat-total{
+  background:var(--sun-softer); border:1px solid rgba(232,170,40,.35);
+  color:#a86e00; border-radius:999px; padding:8px 18px; font-size:13px; font-weight:700;
+  box-shadow:var(--sh-sm);
+}
+.stat-total b{ font-size:18px; font-weight:800; color:var(--sun-deep); }
+.stat-table{ width:100%; border-collapse:separate; border-spacing:0; font-size:13px; }
+.stat-table th, .stat-table td{ border-bottom:1px solid var(--line); padding:9px 10px; text-align:center; }
+.stat-table th{
+  background:var(--sun-soft); color:#8a5a00; font-weight:700; font-size:12.5px; letter-spacing:.04em;
+}
+.stat-table thead th:first-child{ border-top-left-radius:12px; }
+.stat-table thead th:last-child{ border-top-right-radius:12px; }
+.stat-table tbody tr:last-child td{ border-bottom:none; }
+.stat-table tbody tr:hover td{ background:var(--fire-softer); }
+.stat-detail{ list-style:none; max-height:190px; overflow-y:auto; font-size:13px; color:var(--ink-2); line-height:2.1; }
+
+/* ===== 菜品网格 ===== */
+.grid{
+  display:grid; grid-template-columns:repeat(auto-fill, minmax(215px, 1fr));
+  gap:20px; padding:34px clamp(12px, 4vw, 42px); max-width:1260px; margin:0 auto;
+}
+.card{
+  position:relative; overflow:hidden;
+  background:var(--surface); border:1px solid rgba(240,218,180,.9);
+  border-radius:var(--r-lg); padding:24px 20px 21px;
+  box-shadow:var(--sh-sm); cursor:pointer;
+  transition:transform var(--t) var(--ease), box-shadow var(--t) var(--ease), border-color var(--t) var(--ease);
+}
+.card::before{
+  content:""; position:absolute; top:0; left:0; right:0; height:4px;
+  background:linear-gradient(90deg, var(--fire), var(--sun));
+  opacity:0; transform:scaleX(.4); transition:opacity var(--t), transform .32s var(--ease);
+}
+.card:hover{ transform:translateY(-6px); box-shadow:0 8px 16px -6px rgba(255,120,50,.22), 0 26px 46px -18px rgba(224,90,30,.35); border-color:rgba(255,130,60,.45); }
+.card:hover::before{ opacity:1; transform:scaleX(1); }
+.card:active{ transform:translateY(-2px) scale(.99); }
+.card .name{
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  font-size:16.5px; font-weight:700; margin-bottom:14px; line-height:1.4;
+}
+.num{
+  display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;
+  min-width:24px; height:24px; padding:0 7px; border-radius:8px;
+  background:var(--sun-soft); color:var(--sun-deep); font-size:12px; font-weight:800;
+  border:1px solid rgba(232,170,40,.4);
+}
+.tags{ display:flex; gap:7px; flex-wrap:wrap; }
+.tag{ font-size:12px; padding:4px 12px; border-radius:999px; font-weight:600; }
+.tag.meal{ background:var(--fire-soft); color:var(--fire-deep); }
+.tag.cat{ background:var(--sun-soft); color:#a86e00; }
+.tag.new{
+  background:linear-gradient(180deg,var(--sun),var(--fire));
+  color:#fff; font-weight:700; box-shadow:0 3px 8px -2px rgba(255,90,54,.5);
+}
+.empty-tip{ grid-column:1/-1; text-align:center; color:var(--ink-3); padding:70px 20px; }
+.empty-tip .empty-icon{ font-size:52px; margin-bottom:16px; filter:drop-shadow(0 6px 10px rgba(200,110,40,.25)); }
+.empty-tip p{ font-size:15px; font-weight:600; }
+
+/* ===== 弹窗 ===== */
+.modal-mask{
+  display:none; position:fixed; inset:0; z-index:var(--z-modal);
+  background:rgba(90,50,20,.46);
+  -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px);
+  justify-content:center; align-items:center; padding:20px;
+}
+.modal-mask.show{ display:flex; animation:fadeIn .2s ease; }
+.modal{
+  position:relative; background:var(--surface); border-radius:var(--r-xl);
+  max-width:640px; width:100%; max-height:84vh; overflow-y:auto;
+  padding:32px 34px; box-shadow:var(--sh-lg), inset 0 4px 0 rgba(255,180,90,.45);
+  animation:popIn .3s var(--ease);
+  border:1px solid rgba(240,218,180,.8);
+}
+.modal.modal-sm{ max-width:440px; }
+.modal.modal-md{ max-width:570px; }
+#modal h2::before{ content:"🍽️ "; }
+.modal h2{
+  font-family:"YouYuan","幼圆","PingFang SC","Microsoft YaHei UI",sans-serif;
+  font-size:27px; font-weight:700; color:var(--ink); margin-bottom:10px; line-height:1.3;
+}
+.modal .meta{ font-size:13px; color:var(--ink-2); margin-bottom:18px; display:flex; gap:10px; flex-wrap:wrap; }
+.modal .section{ margin-bottom:20px; }
+.modal .section h3{
+  display:flex; align-items:center; gap:9px; margin-bottom:9px;
+  font-size:13px; font-weight:800; color:var(--ink-3); letter-spacing:.1em;
+}
+.modal .section h3::before{ content:""; width:18px; height:4px; border-radius:99px; background:linear-gradient(90deg,var(--fire),var(--sun)); }
+.modal .steps{
+  white-space:pre-wrap; line-height:1.9; font-size:14px; color:#5b4632;
+  background:var(--surface-2); border:1px solid var(--line); border-radius:var(--r-md);
+  padding:16px 18px;
+}
+.modal .btn-row{ display:flex; gap:10px; margin-top:24px; flex-wrap:wrap; }
+.modal .btn-row.center{ justify-content:center; }
+.btn-douyin{
+  display:inline-block; padding:10px 21px; background:#1d1510; color:#fff;
+  border-radius:999px; text-decoration:none; font-size:14px; font-weight:700;
+  box-shadow:0 6px 14px -6px rgba(0,0,0,.45); transition:all var(--t) var(--ease);
+}
+.btn-douyin:hover{ background:#000; transform:translateY(-1px); }
+.btn-close{
+  padding:9px 20px; border:2px solid var(--line-strong); border-radius:999px;
+  background:var(--surface); color:var(--ink-2); font-size:14px; font-weight:600;
+  cursor:pointer; transition:all var(--t) var(--ease);
+}
+.btn-close:hover{ border-color:#d8b070; color:var(--ink); background:var(--surface-2); }
+.btn-solid{
+  padding:9px 20px; border:none; border-radius:999px;
+  background:linear-gradient(180deg,#ff8350,var(--fire)); color:#fff; font-size:14px; font-weight:800;
+  cursor:pointer; box-shadow:0 4px 12px -4px rgba(255,90,54,.55), inset 0 1px 0 rgba(255,255,255,.3);
+  transition:all var(--t) var(--ease);
+}
+.btn-solid:hover{ background:var(--fire-deep); transform:translateY(-1px); }
+.btn-outline{
+  padding:9px 20px; border:2px solid var(--sun-deep); border-radius:999px;
+  background:var(--sun-softer); color:#a86e00; font-size:14px; font-weight:700;
+  cursor:pointer; transition:all var(--t) var(--ease);
+}
+.btn-outline:hover{ background:var(--sun); color:#fff; }
+.hint{ color:var(--ink-3); font-size:12px; line-height:1.8; margin:12px 0 2px; }
+.hint b{ color:var(--fire-deep); }
+
+/* ===== 新增表单 ===== */
+.form-row{ display:flex; align-items:flex-start; gap:12px; margin-bottom:16px; }
+.form-row label{ width:88px; flex-shrink:0; font-size:13px; color:var(--ink-2); line-height:38px; font-weight:600; }
+.form-row label .req{ color:var(--fire); font-weight:800; }
+.form-row input[type="text"], .form-row textarea, .form-row select{
+  flex:1; padding:9px 13px; border:2px solid var(--line-strong); border-radius:var(--r-sm);
+  background:var(--surface); font:inherit; font-size:14px; color:var(--ink); outline:none;
+  transition:border-color var(--t) var(--ease), box-shadow var(--t) var(--ease);
+}
+.form-row input[type="text"]:focus, .form-row textarea:focus, .form-row select:focus{
+  border-color:var(--fire); box-shadow:0 0 0 4px rgba(255,90,54,.13);
+}
+.form-row textarea{ resize:vertical; min-height:80px; line-height:1.7; }
+.form-row .meal-custom{ flex:1; }
+
+/* ===== 页脚 ===== */
+.footer{ text-align:center; padding:30px 16px 40px; color:var(--ink-3); font-size:12.5px; font-weight:500; }
+
+@keyframes fadeIn{ from{ opacity:0; } to{ opacity:1; } }
+@keyframes popIn{ from{ opacity:0; transform:translateY(16px) scale(.98); } to{ opacity:1; transform:none; } }
+
+@media (max-width: 768px){
+  .header{ padding:34px 14px 32px; }
+  .logo{ width:68px; height:68px; font-size:34px; margin-bottom:14px; }
+  .header h1{ font-size:31px; }
+  .header p{ font-size:13px; }
+  .filter-bar{ gap:8px; padding:13px 10px; }
+  .filter-btn{ padding:7px 14px; font-size:13px; }
+  .filter-search{ flex:1 1 100%; order:10; }
+  .filter-search input{ width:100%; }
+  .ingr-tags{ order:20; }
+  .btn-add, .shop-btn{ padding:8px 14px; font-size:13px; }
+  .random-bar{ padding:18px 10px 22px; gap:13px; }
+  .random-result{ padding:18px; gap:12px; }
+  .rr-info{ min-width:100%; }
+  .rr-actions{ width:100%; justify-content:center; }
+  .grid{ padding:22px 12px; gap:14px; grid-template-columns:repeat(auto-fill, minmax(158px, 1fr)); }
+  .card{ padding:18px 15px; }
+  .card .name{ font-size:15px; }
+  .btn-random{ padding:12px 26px; font-size:15px; }
+  .modal{ padding:26px 20px; max-height:88vh; }
+  .modal h2{ font-size:22px; }
+  .modal .steps{ font-size:13px; padding:14px 15px; }
+  .form-row{ flex-direction:column; gap:6px; }
+  .form-row label{ width:auto; line-height:1.6; }
+  .stat-table th, .stat-table td{ padding:7px 6px; font-size:12px; }
+}
+
 </style>
 </head>
 <body>
+<div class="topbar"></div>
 <div class="header">
+  <div class="logo">🍳</div>
   <h1>慧的菜品选择系统</h1>
-  <p>共 <span id="totalCount">0</span> 道菜 · 点击卡片查看菜谱</p>
+  <p>共 <span id="totalCount">0</span> 道好菜 · 点卡片看菜谱，今天馋哪口？🤤</p>
   <span class="conn-badge off" id="connBadge">未连接（可手动同步）</span>
 </div>
 <div class="filter-bar">
-  <button class="filter-btn active" data-meal="全部">全部</button>
-  <button class="filter-btn" data-meal="早餐">早餐</button>
-  <button class="filter-btn" data-meal="正餐">正餐</button>
-  <button class="filter-btn" data-meal="甜品">甜品</button>
+  <button class="filter-btn active" data-meal="全部">🍽️ 全部</button>
+  <button class="filter-btn" data-meal="早餐">🥣 早餐</button>
+  <button class="filter-btn" data-meal="正餐">🍚 正餐</button>
+  <button class="filter-btn" data-meal="甜品">🍮 甜品</button>
   <div class="filter-search">
     <span class="search-icon">🔍</span>
     <input id="ingrFilter" type="text" placeholder="按食材筛选" autocomplete="off" />
@@ -130,10 +417,10 @@ body { font-family: "Microsoft YaHei", "PingFang SC", sans-serif; background: #f
 </div>
 <div class="random-bar">
   <div class="random-controls">
-    <span class="random-label">随机选菜</span>
+    <span class="random-label">🎲 随机选菜</span>
     <select id="rMealSelect" class="random-select"></select>
-    <button id="rPickBtn" class="btn-random">随机来一道</button>
-    <button id="rStatBtn" class="btn-stat">选菜记录</button>
+    <button id="rPickBtn" class="btn-random">🍀 随机来一道</button>
+    <button id="rStatBtn" class="btn-stat">📒 选菜记录</button>
   </div>
   <div class="random-result" id="randomResult" style="display:none;">
     <div class="rr-info">
@@ -142,8 +429,8 @@ body { font-family: "Microsoft YaHei", "PingFang SC", sans-serif; background: #f
       <div class="rr-shop" id="rrShop"></div>
     </div>
     <div class="rr-actions">
-      <button class="btn-random" id="rrAgainBtn">换一道</button>
-      <button class="btn-rec" id="rrConfirmBtn">就它了，记录</button>
+      <button class="btn-again" id="rrAgainBtn">🔄 换一道</button>
+      <button class="btn-rec" id="rrConfirmBtn">😋 就它了，记录</button>
       <button class="btn-close" id="rrDetailBtn">查看菜谱</button>
     </div>
   </div>
@@ -175,10 +462,10 @@ body { font-family: "Microsoft YaHei", "PingFang SC", sans-serif; background: #f
 </div>
 
 <div class="modal-mask" id="rModalMask">
-  <div class="modal" style="max-width:420px;">
-    <h2>记录选定</h2>
+  <div class="modal modal-sm">
+    <h2>📝 记录选定</h2>
     <div class="meta" id="rRecordName"></div>
-    <div class="btn-row" style="justify-content:center;">
+    <div class="btn-row center">
       <button class="btn-rec" onclick="recordSelection('早餐')">早餐选定</button>
       <button class="btn-rec" onclick="recordSelection('中餐')">中餐选定</button>
       <button class="btn-rec" onclick="recordSelection('晚餐')">晚餐选定</button>
@@ -191,7 +478,7 @@ body { font-family: "Microsoft YaHei", "PingFang SC", sans-serif; background: #f
 
 <div class="modal-mask" id="rStatMask">
   <div class="modal">
-    <h2>选菜记录统计</h2>
+    <h2>📊 选菜记录统计</h2>
     <div class="stat-totals">
       <span class="stat-total">早餐 <b id="stTotalBreakfast">0</b></span>
       <span class="stat-total">中餐 <b id="stTotalLunch">0</b></span>
@@ -209,19 +496,19 @@ body { font-family: "Microsoft YaHei", "PingFang SC", sans-serif; background: #f
       <h3>历史明细（按日期倒序）</h3>
       <ul class="stat-detail" id="stDetailList"></ul>
     </div>
-    <p style="color:#888;font-size:12px;margin:8px 0 4px;">下载后放到 慧做菜 文件夹或下载目录，双击「菜品系统.bat」即可自动写入 Excel；也可以直接把 json 文件拖给 Marvis</p>
+    <p class="hint">下载后放到 慧做菜 文件夹或下载目录，双击「菜品系统.bat」即可自动写入 Excel；也可以直接把 json 文件拖给 Marvis</p>
     <div class="btn-row">
-      <button class="btn-close" id="stSyncBtn" style="background:#e8890c;color:#fff;">导出记录文件</button>
-      <button class="btn-close" id="stExportBtn" style="background:#ff6b6b;color:#fff;">导出CSV</button>
-      <button class="btn-close" id="stNewDishBtn" style="background:#4caf50;color:#fff;" title="下载后放到 慧做菜 文件夹或下载目录，双击「菜品系统.bat」自动写入 Excel">导出新菜品</button>
+      <button class="btn-outline" id="stSyncBtn">导出记录文件</button>
+      <button class="btn-outline" id="stExportBtn">导出CSV</button>
+      <button class="btn-solid" id="stNewDishBtn" title="下载后放到 慧做菜 文件夹或下载目录，双击「菜品系统.bat」自动写入 Excel">导出新菜品</button>
       <button class="btn-close" onclick="closeStats()">关闭</button>
     </div>
   </div>
 </div>
 
 <div class="modal-mask" id="addMask">
-  <div class="modal" style="max-width:560px;">
-    <h2>新增菜品</h2>
+  <div class="modal modal-md">
+    <h2>➕ 新增菜品</h2>
     <div class="form-row">
       <label><span class="req">*</span>菜品名称</label>
       <input type="text" id="adName" placeholder="必填，如：番茄炒蛋">
@@ -256,9 +543,9 @@ body { font-family: "Microsoft YaHei", "PingFang SC", sans-serif; background: #f
       <label>食材清单</label>
       <input type="text" id="adShop" placeholder="选填，如：番茄2个、鸡蛋3个">
     </div>
-    <p style="color:#888;font-size:12px;margin:6px 0 0;">保存后请点「导出新菜品」，下载 新菜品_YYYYMMDD.json 放到慧做菜文件夹或下载目录，双击「菜品系统.bat」自动写入 Excel。</p>
+    <p class="hint">保存后请点「导出新菜品」，下载 <b>新菜品_YYYYMMDD.json</b> 放到慧做菜文件夹或下载目录，双击「菜品系统.bat」自动写入 Excel。</p>
     <div class="btn-row">
-      <button class="btn-close" id="adSaveBtn" style="background:#ff6b6b;color:#fff;">保存</button>
+      <button class="btn-solid" id="adSaveBtn">保存</button>
       <button class="btn-close" onclick="closeAdd()">取消</button>
     </div>
   </div>
@@ -397,14 +684,14 @@ function render() {
     const tip = currentIngredient.trim()
       ? `没有找到含「${currentIngredient.trim()}」的菜品，换个食材试试吧。`
       : '该餐次暂无菜品，请在 PDF 中补充后更新。';
-    grid.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:#999;padding:40px;">${tip}</p>`;
+    grid.innerHTML = `<div class="empty-tip"><div class="empty-icon">🥘</div><p>${tip}</p></div>`;
     return;
   }
   list.forEach(d => {
     const card = document.createElement('div');
     card.className = 'card';
     const badge = d['isNew'] ? ' <span class="tag new">新</span>' : '';
-    card.innerHTML = `<div class="name">${d['编号']} ${d['菜品名称']}${badge}</div>
+    card.innerHTML = `<div class="name"><span class="num">${d['编号']}</span>${d['菜品名称']}${badge}</div>
       <div class="tags"><span class="tag meal">${d['餐次']}</span><span class="tag cat">${d['分类']}</span></div>`;
     card.onclick = () => showDetail(d);
     grid.appendChild(card);
